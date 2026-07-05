@@ -8,8 +8,50 @@
 <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
-<meta name="description"  content="OA Dr. Michael Neumann & OÄ Dr. Etelka Neumann – Gynäkologie und Geburtshilfe in 1180 Wien. Über 35 Jahre Erfahrung. Jetzt online Termin anfragen.">
+<meta name="description" content="OA Dr. Michael Neumann & OÄ Dr. Etelka Neumann – Gynäkologie und Geburtshilfe in 1180 Wien. Über 35 Jahre Erfahrung. Jetzt online Termin anfragen.">
+<meta name="robots" content="index, follow">
 <link rel="canonical" href="https://www.helenini.at">
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.helenini.at">
+<meta property="og:title" content="Ordination Dr. Neumann – Gynäkologie Wien 18">
+<meta property="og:description" content="OA Dr. Michael Neumann & OÄ Dr. Etelka Neumann – Gynäkologie und Geburtshilfe in 1180 Wien. Über 35 Jahre Erfahrung. Jetzt online Termin anfragen.">
+<meta property="og:locale" content="de_AT">
+<meta property="og:image" content="https://www.helenini.at/logo-neumann.png">
+<!-- JSON-LD Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "MedicalBusiness",
+  "name": "Ordination Dr. Michael Neumann & Dr. Etelka Neumann",
+  "url": "https://www.helenini.at",
+  "description": "Fachärzte für Gynäkologie und Geburtshilfe in 1180 Wien. Über 35 Jahre Erfahrung.",
+  "medicalSpecialty": "Gynecologic",
+  "telephone": "+43-1-470-65-59",
+  "email": "ordination@frauenarzt-neumann.at",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Hofstattgasse 17/3",
+    "addressLocality": "Wien",
+    "postalCode": "1180",
+    "addressCountry": "AT"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": 48.2296,
+    "longitude": 16.3449
+  },
+  "openingHoursSpecification": [
+    { "@type": "OpeningHoursSpecification", "dayOfWeek": "Monday",    "opens": "11:00", "closes": "18:00" },
+    { "@type": "OpeningHoursSpecification", "dayOfWeek": "Tuesday",   "opens": "14:00", "closes": "19:00" },
+    { "@type": "OpeningHoursSpecification", "dayOfWeek": "Wednesday", "opens": "14:00", "closes": "19:00" },
+    { "@type": "OpeningHoursSpecification", "dayOfWeek": "Thursday",  "opens": "11:00", "closes": "18:00" }
+  ],
+  "priceRange": "€€",
+  "hasMap": "https://maps.google.com/?q=Hofstattgasse+17/3+1180+Wien",
+  "sameAs": ["https://www.docfinder.at/suche/arzt/ergebnis?searchterm=neumann+gynäkologie+wien"]
+}
+</script>
   <!-- TEST-VERSION: helenini.at – Zieldomain: frauenarzt-neumann.at -->
 <title>Ordination Dr. Neumann – Gynäkologie Wien 18</title>
 <link rel="icon" type="image/png" href="logo-neumann.png">
@@ -345,6 +387,73 @@
     position: absolute; bottom: 0; left: 0; right: 0;
     height: 3px; background: var(--rose);
   }
+  .arzt-photo-img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center top;
+    display: block;
+  }
+
+  /* ── TEAM ATMOSPHÄRE ── */
+  .team-atmo {
+    max-width: 1200px; margin: 4rem auto 0;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+  }
+  .team-atmo-item {
+    position: relative; overflow: hidden;
+    aspect-ratio: 4/3;
+    border: 1px solid var(--border);
+  }
+  .team-atmo-item img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center;
+    display: block;
+    transition: transform 0.5s ease;
+  }
+  .team-atmo-item:hover img { transform: scale(1.03); }
+  .team-atmo-caption {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 0.8rem 1rem;
+    background: linear-gradient(transparent, rgba(42,35,32,0.6));
+    color: #fff;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    font-weight: 300;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── ELENA CARD ── */
+  .elena-row {
+    max-width: 1200px; margin: 4rem auto 0;
+    display: grid; grid-template-columns: 280px 1fr; gap: 4rem;
+    align-items: start;
+  }
+  .elena-photo-wrap {
+    width: 100%; aspect-ratio: 4/5;
+    background: var(--rose-mist);
+    border: 1px solid var(--border);
+    position: relative; overflow: hidden;
+  }
+  .elena-photo-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center top;
+    display: block;
+  }
+  .elena-bar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 3px; background: var(--rose);
+  }
+  .elena-info { padding-top: 0.5rem; }
+  .elena-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem; font-weight: 400;
+    margin: 0.5rem 0 0.8rem;
+  }
+  .elena-bio { font-size: 0.9rem; color: var(--stone-mid); line-height: 1.9; }
+  @media (max-width: 768px) {
+    .team-atmo { grid-template-columns: 1fr; }
+    .elena-row { grid-template-columns: 1fr; gap: 2rem; }
+    .elena-photo-wrap { max-width: 260px; }
+  }
   .arzt-role { margin-bottom: 0.5rem; }
   .arzt-name {
     font-family: 'Cormorant Garamond', serif;
@@ -507,6 +616,31 @@
     .modal-box { margin: 0.5rem; max-height: 95vh; }
   }
 
+  /* ── STICKY MOBILE CTA ── */
+  #sticky-portal-bar { display: none; }
+  @media (max-width: 900px) {
+    #sticky-portal-bar {
+      display: block;
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
+      padding: 10px 16px;
+      padding-bottom: calc(10px + env(safe-area-inset-bottom));
+      background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-top: 1px solid var(--border);
+      box-shadow: 0 -4px 16px rgba(42,35,32,0.08);
+    }
+    #sticky-portal-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      background: var(--rose); color: #fff;
+      border-radius: 10px; padding: 13px 20px;
+      font-size: 0.9rem; font-weight: 600; letter-spacing: 0.01em;
+      text-decoration: none;
+      box-shadow: 0 3px 14px rgba(155,79,122,0.30);
+    }
+    body { padding-bottom: 74px; }
+  }
+
   @media (max-width: 900px) {
     .hero { grid-template-columns: 1fr; min-height: auto; }
     .hero-left { padding: 4rem 6vw 3rem; }
@@ -578,6 +712,9 @@
 
   /* REVIEWS */
   .reviews-section { padding: 5rem 8vw; background: var(--cream); }
+  .reviews-source { display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 0.9rem; font-size: 0.8rem; color: var(--stone-light); text-decoration: none; }
+  .reviews-source strong { color: var(--rose); font-weight: 600; }
+  .reviews-source:hover strong { text-decoration: underline; }
   .reviews-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 3rem; }
   .review-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 1.8rem; display: flex; flex-direction: column; gap: 1rem; transition: box-shadow 0.2s; }
   .review-card:hover { box-shadow: 0 4px 24px rgba(42,35,32,0.08); }
@@ -694,7 +831,7 @@
       <div class="times-contact">
         <span>📞 <a href="tel:+4314706559">+43 1 470 65 59</a></span>
         <span>✉ <a href="mailto:info@helenini.at">info@helenini.at</a></span>
-        <span>📍 Hofstattgasse 17/3, 1180 Wien</span>
+        <span id="times-addr">📍 Hofstattgasse 17/3, 1180 Wien</span>
       </div>
     </div>
   </div>
@@ -785,7 +922,7 @@
       <!-- Michael -->
       <div class="arzt-card">
         <div class="arzt-photo-wrap">
-          <div class="arzt-photo-initials">MN</div>
+          <img class="arzt-photo-img" src="dr-michael.jpg" alt="OA Dr. Michael Neumann" loading="lazy">
           <div class="arzt-photo-bar"></div>
         </div>
         <span class="label arzt-role" id="arzt-m-role">Frauenarzt</span>
@@ -810,7 +947,7 @@
       <!-- Etelka -->
       <div class="arzt-card">
         <div class="arzt-photo-wrap">
-          <div class="arzt-photo-initials">EN</div>
+          <img class="arzt-photo-img" src="dr-etelka.jpg" alt="OÄ Dr. Etelka Neumann" loading="lazy">
           <div class="arzt-photo-bar"></div>
         </div>
         <span class="label arzt-role" id="arzt-e-role">Frauenärztin</span>
@@ -834,6 +971,34 @@
         </div>
       </div>
     </div>
+
+    <!-- Elena -->
+    <div class="elena-row">
+      <div class="elena-photo-wrap">
+        <img src="elena.jpg" alt="Elena, Ordinationsassistenz" loading="lazy">
+        <div class="elena-bar"></div>
+      </div>
+      <div class="elena-info">
+        <span class="label" id="elena-eyebrow">Ordinationsassistenz</span>
+        <h3 class="elena-name">Elena</h3>
+        <p class="elena-bio" id="elena-bio">
+          Elena ist das freundliche Gesicht unserer Ordination. Als erfahrene Ordinationsassistenz kümmert sie sich um alle organisatorischen Abläufe, empfängt Patientinnen herzlich und sorgt dafür, dass sich jede von Anfang an gut aufgehoben fühlt. Zusammen mit dem Ärzteteam bildet sie das Herzstück unserer Ordination.
+        </p>
+      </div>
+    </div>
+
+    <!-- Atmosphäre -->
+    <div class="team-atmo">
+      <div class="team-atmo-item">
+        <img src="team-beide.jpg" alt="OA Dr. Michael Neumann und OÄ Dr. Etelka Neumann" loading="lazy">
+        <div class="team-atmo-caption">Dr. Michael &amp; Dr. Etelka Neumann</div>
+      </div>
+      <div class="team-atmo-item">
+        <img src="team-etelka-elena-2.jpg" alt="Dr. Etelka Neumann und Elena" loading="lazy" style="object-position: center 12%;">
+        <div class="team-atmo-caption">Dr. Etelka Neumann &amp; Elena</div>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -949,22 +1114,25 @@
     <div class="section-header">
       <span class="label" id="reviews-label">Bewertungen</span>
       <h2 class="heading" id="reviews-h2">Was unsere Patientinnen<br>über uns sagen.</h2>
+      <a class="reviews-source" id="reviews-source" href="https://www.docfinder.at/suche/arzt/ergebnis?searchterm=neumann+gyn%C3%A4kologie+wien" target="_blank" rel="noopener">
+        <span id="reviews-source-text">Alle Bewertungen stammen von</span> <strong>DocFinder</strong>
+      </a>
     </div>
     <div class="reviews-grid" id="reviews-grid">
       <div class="review-card">
         <div class="review-stars">★★★★★</div>
         <div class="review-text" id="review-text-1">Fr. Dr. Neumann und Hr. Dr. Neumann sind mit Abstand die zwei nettesten Ärzte, die ich je erlebt habe. Als Menschen sind sie einfach zwei Engel. In ihrer Ordination fühlt man sich wie in einer Wohlfühloase. Ich wurde sehr aufmerksam und hingebungsvoll betreut.</div>
-        <div class="review-footer"><span class="review-name">Lejla B.</span><span class="review-date" id="review-date-1">Verifizierte Patientin</span></div>
+        <div class="review-footer"><span class="review-name">Lejla B.</span><span class="review-date" id="review-date-1">Verifizierte Patientin · <a href="https://www.docfinder.at" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">DocFinder</a></span></div>
       </div>
       <div class="review-card">
         <div class="review-stars">★★★★★</div>
         <div class="review-text" id="review-text-2">Einer der wenigen Gynäkologen die wissen, dass man Frauen auch zuhören muss um herauszufinden was ihnen fehlt und was ihnen persönlich am besten hilft. Dr. Neumann ist ein Arzt mit viel Erfahrung und scharfem Blick fürs Wesentliche. Kurze Wartezeiten, da bleibt man gerne.</div>
-        <div class="review-footer"><span class="review-name">Patientin</span><span class="review-date" id="review-date-2">Verifizierte Patientin</span></div>
+        <div class="review-footer"><span class="review-name" id="review-name-2">Patientin</span><span class="review-date" id="review-date-2">Verifizierte Patientin · <a href="https://www.docfinder.at" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">DocFinder</a></span></div>
       </div>
       <div class="review-card">
         <div class="review-stars">★★★★★</div>
         <div class="review-text" id="review-text-3">Super Arzt. Sehr kompetent und freundlich. Hat mich im Wilhelminenspital wegen Endometriose operiert und mich danach auch weiter super betreut. Sehr empfehlenswert!</div>
-        <div class="review-footer"><span class="review-name">Patientin</span><span class="review-date" id="review-date-3">Verifizierte Patientin</span></div>
+        <div class="review-footer"><span class="review-name" id="review-name-3">Patientin</span><span class="review-date" id="review-date-3">Verifizierte Patientin · <a href="https://www.docfinder.at" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">DocFinder</a></span></div>
       </div>
     </div>
   </div>
@@ -1017,6 +1185,7 @@
         etelka_days: 'Montag & Donnerstag',
         etelka_hours: '11:00 – 18:00 Uhr',
         etelka_ins: 'KFA · Privat · Magyar',
+        addr: '📍 Hofstattgasse 17/3, 1180 Wien',
       },
       leistungen: {
         eyebrow: 'Unser Leistungsspektrum',
@@ -1042,6 +1211,8 @@
         m_role: 'Frauenarzt', m_schwerpunkte: 'Schwerpunkte',
         m_bio: 'OA Dr. Michael Neumann hat in seiner beruflichen Laufbahn über 8.000 Schwangerschaften und Geburten begleitet und über 5.000 Operationen durchgeführt. Seine Patientinnen schätzen neben seiner beruflichen Kompetenz auch seine freundliche, einfühlsame und humorvolle Art.<br><br>Von 1980 bis 2014 war er als Gynäkologe am Wiener Wilhelminenspital tätig, seit 1990 als Oberarzt. Er ist Belegarzt im Rudolfinerhaus und Sanatorium Döbling.',
         e_role: 'Frauenärztin',
+        elena_eyebrow: 'Ordinationsassistenz',
+        elena_bio: 'Elena ist das freundliche Gesicht unserer Ordination. Als erfahrene Ordinationsassistenz kümmert sie sich um alle organisatorischen Abläufe, empfängt Patientinnen herzlich und sorgt dafür, dass sich jede von Anfang an gut aufgehoben fühlt. Zusammen mit dem Ärzteteam bildet sie das Herzstück unserer Ordination.',
         e_bio: 'OÄ Dr. Etelka Neumann weist eine über 30-jährige Erfahrung in der Geburtshilfe und Frauenheilkunde auf. Ihre Patientinnen schätzen ihre professionelle und sanfte Art, ihre hohe Empathie und ihre profunde Erfahrung.<br><br>Die berufliche Laufbahn begann als diplomierte Krankheitsschwester und Hebamme – über 10 Jahre in der Budapester Semmelweis-Klinik und im Wilhelminenspital Wien. Seit 2008 als Fachärztin tätig, aktuell Belegärztin im Rudolfinerhaus und Sanatorium Döbling. Die Ordination wird auch auf Ungarisch angeboten.',
       },
       portal: {
@@ -1069,7 +1240,9 @@
       reviews: {
         label: 'Bewertungen',
         h2: 'Was unsere Patientinnen<br>über uns sagen.',
-        verified: 'Verifizierte Patientin',
+        sourceText: 'Alle Bewertungen stammen von',
+        patient: 'Patientin',
+        verified: 'Verifizierte Patientin · <a href="https://www.docfinder.at/suche/arzt/ergebnis?searchterm=neumann+gyn%C3%A4kologie+wien" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">DocFinder</a>',
         r1: 'Fr. Dr. Neumann und Hr. Dr. Neumann sind mit Abstand die zwei nettesten Ärzte, die ich je erlebt habe. Als Menschen sind sie einfach zwei Engel. In ihrer Ordination fühlt man sich wie in einer Wohlfühloase. Ich wurde sehr aufmerksam und hingebungsvoll betreut.',
         r2: 'Einer der wenigen Gynäkologen die wissen, dass man Frauen auch zuhören muss um herauszufinden was ihnen fehlt und was ihnen persönlich am besten hilft. Dr. Neumann ist ein Arzt mit viel Erfahrung und scharfem Blick fürs Wesentliche. Kurze Wartezeiten, da bleibt man gerne.',
         r3: 'Super Arzt. Sehr kompetent und freundlich. Hat mich im Wilhelminenspital wegen Endometriose operiert und mich danach auch weiter super betreut. Sehr empfehlenswert!',
@@ -1079,6 +1252,8 @@
       footer: { impressum: 'Impressum', datenschutz: 'Datenschutz', partner: 'Partner' },
       modal_impressum: 'Impressum',
       modal_datenschutz: 'Datenschutzerklärung',
+      modal_partner: 'Partnernetzwerk',
+      modal_partner_desc: 'Wir arbeiten mit einem Netzwerk an Expertinnen und Experten aus anderen Fachbereichen zusammen.',
     },
     hu: {
       nav: { leistungen: 'Szolgáltatások', ueber: 'Rólunk', kontakt: 'Kapcsolat', portal: 'Online Portál' },
@@ -1097,6 +1272,7 @@
       etelka_days: 'Hétfő & Csütörtök',
       etelka_hours: '11:00 – 18:00',
       etelka_ins: 'KFA · Magán · Magyar',
+      addr: '📍 Hofstattgasse 17/3, 1180 Bécs',
     },
       leistungen: {
         eyebrow: 'Szolgáltatásaink',
@@ -1122,6 +1298,8 @@
         m_role: 'Nőgyógyász', m_schwerpunkte: 'Szakterületek',
         m_bio: 'OA Dr. Michael Neumann szakmai pályafutása során több mint 8 000 terhességet és szülést kísért végig, és több mint 5 000 műtétet végzett. Páciensek szakmai kompetenciája mellett barátságos, empatikus és humoros stílusát is értékelik.<br><br>1980-tól 2014-ig a bécsi Wilhelminenspital nőgyógyásza volt, 1990-től főorvosi beosztásban. Belegorvos a Rudolfinerhaus-ban és a Sanatorium Döblingben.',
         e_role: 'Nőgyógyász',
+        elena_eyebrow: 'Rendelői asszisztens',
+        elena_bio: 'Elena a rendelőnk barátságos arca. Tapasztalt rendelői asszisztensként minden szervezési feladatot elvégez, szívélyesen fogadja a pácienseket, és gondoskodik arról, hogy mindenki az első pillanattól fogva jól érezze magát. Az orvosi csapattal együtt ő alkotja rendelőnk szívét.',
         e_bio: 'OÄ Dr. Etelka Neumann több mint 30 éves tapasztalattal rendelkezik a szülészetben és nőgyógyászatban. Páciensek professzionális és gyengéd stílusát, magas empátiáját és mély tapasztalatát értékelik.<br><br>Pályafutását diplomás ápolóként és bábáként kezdte – több mint 10 évig dolgozott a budapesti Semmelweis Klinikán és a bécsi Wilhelminenspitalban. 2008 óta szakorvos, jelenleg a Rudolfinerhaus és a Sanatorium Döbling belegárztnője. A rendelő magyar nyelven is elérhető.',
       },
       portal: {
@@ -1149,7 +1327,9 @@
       reviews: {
         label: 'Értékelések',
         h2: 'Amit pácienseink<br>mondanak rólunk.',
-        verified: 'Hitelesített páciens',
+        sourceText: 'Minden értékelés forrása:',
+        patient: 'Páciens',
+        verified: 'Hitelesített páciens · <a href="https://www.docfinder.at/suche/arzt/ergebnis?searchterm=neumann+gyn%C3%A4kologie+wien" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">DocFinder</a>',
         r1: 'Dr. Neumann asszony és Dr. Neumann úr messze a legkedvesebb orvosok, akikkel valaha találkoztam. Ember voltukból fakadóan igazi angyalok. Rendelőjükben jól érzi magát az ember. Nagyon figyelmes és odaadó ellátásban részesültem.',
         r2: 'Az egyik kevés nőgyógyász, aki tudja, hogy a nőkre hallgatni is kell, hogy kiderüljön, mi hiányzik nekik és mi segít nekik a legjobban. Dr. Neumann tapasztalt orvos, aki lényeglátó. Rövid várakozási idő – szívesen visszatérünk.',
         r3: 'Kiváló orvos. Nagyon kompetens és barátságos. A Wilhelminenspitalban endometriózis miatt megoperált, és utána is kiválóan gondozott. Nagyon ajánlom!',
@@ -1159,6 +1339,8 @@
       footer: { impressum: 'Impresszum', datenschutz: 'Adatvédelem', partner: 'Partnerek' },
       modal_impressum: 'Impresszum',
       modal_datenschutz: 'Adatvédelmi nyilatkozat',
+      modal_partner: 'Partnerhálózat',
+      modal_partner_desc: 'Más szakterületek szakértőiből álló hálózattal dolgozunk együtt.',
     },
     en: {
       nav: { leistungen: 'Services', ueber: 'About us', kontakt: 'Contact', portal: 'Online Portal' },
@@ -1177,6 +1359,7 @@
       etelka_days: 'Monday & Thursday',
       etelka_hours: '11:00 am – 6:00 pm',
       etelka_ins: 'KFA · Private · Hungarian',
+      addr: '📍 Hofstattgasse 17/3, 1180 Vienna',
     },
       leistungen: {
         eyebrow: 'Our services',
@@ -1202,6 +1385,8 @@
         m_role: 'Gynaecologist', m_schwerpunkte: 'Specialisations',
         m_bio: 'OA Dr. Michael Neumann has accompanied over 8,000 pregnancies and births and performed over 5,000 operations throughout his career. His patients value not only his professional competence but also his friendly, empathetic and humorous manner.<br><br>From 1980 to 2014 he worked as a gynaecologist at the Wilhelminenspital in Vienna, from 1990 as senior physician. He is a consultant at Rudolfinerhaus and Sanatorium Döbling.',
         e_role: 'Gynaecologist',
+        elena_eyebrow: 'Practice Assistant',
+        elena_bio: 'Elena is the friendly face of our practice. As an experienced practice assistant, she handles all administrative workflows, welcomes patients warmly and ensures that everyone feels well cared for from the very first moment. Together with the medical team, she is the heart of our practice.',
         e_bio: "OÄ Dr. Etelka Neumann has over 30 years of experience in obstetrics and gynaecology. Her patients value her professional and gentle manner, her high empathy and her profound experience.<br><br>She began her career as a qualified nurse and midwife – working for over 10 years at the Semmelweis Clinic in Budapest and the Wilhelminenspital in Vienna. She has been a specialist since 2008 and is currently a consultant at Rudolfinerhaus and Sanatorium Döbling. The practice is also available in Hungarian.",
       },
       portal: {
@@ -1229,7 +1414,9 @@
       reviews: {
         label: 'Patient reviews',
         h2: 'What our patients<br>say about us.',
-        verified: 'Verified patient',
+        sourceText: 'All reviews sourced from',
+        patient: 'Patient',
+        verified: 'Verified patient · <a href="https://www.docfinder.at/suche/arzt/ergebnis?searchterm=neumann+gyn%C3%A4kologie+wien" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">DocFinder</a>',
         r1: 'Dr. Neumann and Dr. Neumann are by far the two nicest doctors I have ever met. As people, they are simply two angels. In their practice you feel like you are in a wellness oasis. I was treated with great care and dedication.',
         r2: 'One of the few gynaecologists who know that you have to listen to women to find out what is wrong and what helps them best. Dr. Neumann is a doctor with a lot of experience and a sharp eye for what matters. Short waiting times – you are happy to come back.',
         r3: 'Great doctor. Very competent and friendly. He operated on me at Wilhelminen Hospital for endometriosis and then looked after me superbly. Highly recommended!',
@@ -1239,6 +1426,8 @@
       footer: { impressum: 'Legal notice', datenschutz: 'Privacy policy', partner: 'Partners' },
       modal_impressum: 'Legal Notice',
       modal_datenschutz: 'Privacy Policy',
+      modal_partner: 'Partner Network',
+      modal_partner_desc: 'We work with a network of experts from other medical specialties.',
     }
   };
 
@@ -1256,6 +1445,11 @@
     document.getElementById('nav-ueber').textContent = t.nav.ueber;
     document.getElementById('nav-kontakt').textContent = t.nav.kontakt;
     document.getElementById('nav-portal').textContent = t.nav.portal;
+
+    // Sticky mobile CTA
+    const _stickyCta = { de: 'Jetzt Termin buchen →', hu: 'Időpontfoglalás →', en: 'Book appointment →' };
+    const _stickyBtn = document.getElementById('sticky-portal-btn');
+    if (_stickyBtn) _stickyBtn.textContent = _stickyCta[lang] || _stickyCta.de;
 
     // Hero
     document.getElementById('hero-eyebrow').textContent = t.hero.eyebrow;
@@ -1290,6 +1484,8 @@
     document.getElementById('arzt-e-role').textContent = t.team.e_role;
     document.getElementById('arzt-e-bio').innerHTML = t.team.e_bio;
     document.getElementById('arzt-e-schwerpunkte').textContent = t.team.m_schwerpunkte;
+    document.getElementById('elena-eyebrow').textContent = t.team.elena_eyebrow;
+    document.getElementById('elena-bio').textContent = t.team.elena_bio;
 
     // Portal
     document.getElementById('portal-eyebrow').textContent = t.portal.eyebrow;
@@ -1321,6 +1517,7 @@
       document.getElementById('times-e-hours').textContent = t.times.etelka_hours;
       document.getElementById('times-m-ins').textContent = t.times.michael_ins;
       document.getElementById('times-e-ins').textContent = t.times.etelka_ins;
+      if (t.times.addr) document.getElementById('times-addr').textContent = t.times.addr;
     }
     if (document.getElementById('kontakt-tel-hours')) {
       document.getElementById('kontakt-tel-hours').textContent = t.kontakt.tel_hours;
@@ -1330,6 +1527,13 @@
     document.getElementById('footer-impressum').textContent = t.footer.impressum;
     document.getElementById('footer-datenschutz').textContent = t.footer.datenschutz;
     document.getElementById('footer-partner').textContent = t.footer.partner;
+
+    // Partner modal
+    const _pTitle = document.getElementById('modal-partner-title');
+    if (_pTitle && t.modal_partner) _pTitle.textContent = t.modal_partner;
+    const _pDesc = document.getElementById('modal-partner-desc');
+    if (_pDesc && t.modal_partner_desc) _pDesc.textContent = t.modal_partner_desc;
+    if (_lastPartners) renderPartners(_lastPartners);
 
     // Lang switcher highlight (desktop + mobile)
     document.querySelectorAll('.nav-lang-btn').forEach(a => {
@@ -1345,8 +1549,10 @@
     if (t.reviews) {
       const rl = document.getElementById('reviews-label');
       const rh = document.getElementById('reviews-h2');
+      const rs = document.getElementById('reviews-source-text');
       if (rl) rl.textContent = t.reviews.label;
       if (rh) rh.innerHTML = t.reviews.h2;
+      if (rs) rs.textContent = t.reviews.sourceText;
       const r1 = document.getElementById('review-text-1');
       const r2 = document.getElementById('review-text-2');
       const r3 = document.getElementById('review-text-3');
@@ -1355,7 +1561,11 @@
       if (r3) r3.textContent = t.reviews.r3;
       ['review-date-1','review-date-2','review-date-3'].forEach(function(id) {
         const el = document.getElementById(id);
-        if (el) el.textContent = t.reviews.verified;
+        if (el) el.innerHTML = t.reviews.verified;
+      });
+      ['review-name-2','review-name-3'].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = t.reviews.patient;
       });
     }
 
@@ -1365,7 +1575,7 @@
       if (cont) {
         cont.innerHTML = t.schwerpunkte_m.map(function(s) {
           return '<span class="schwerpunkt-tag">' + s + '</span>';
-        }).join('') + '<span class="schwerpunkt-tag">BVAEB · KFA · Privat</span>';
+        }).join('');
       }
     }
 
@@ -1403,6 +1613,7 @@
 
   // Init language
   setLang('de');
+  loadOpeningHours();
 
   // Subtle scroll animation
   const observer = new IntersectionObserver((entries) => {
@@ -1438,14 +1649,73 @@
     { name: 'Dr. Hans-Peter Holzapfel', specialty: 'Orthopädie', address: 'Sieveringerstrasse 36/2, 1190 Wien', website: 'www.medfocus.at', notes: 'Facharzt für Orthopädie und orthopädische Chirurgie', phone: null },
   ];
 
+  var SPECIALTY_MAP = {
+    en: {
+      'Allgemeinmedizin': 'General Medicine', 'Innere Medizin': 'Internal Medicine',
+      'Gynäkologie': 'Gynaecology', 'Gynäkologie & Geburtshilfe': 'Gynaecology & Obstetrics',
+      'Geburtshilfe': 'Obstetrics', 'Urologie': 'Urology', 'Orthopädie': 'Orthopaedics',
+      'Unfallchirurgie': 'Trauma Surgery', 'Chirurgie': 'Surgery',
+      'Plastische Chirurgie': 'Plastic Surgery', 'Neurochirurgie': 'Neurosurgery',
+      'Gefäßchirurgie': 'Vascular Surgery', 'Dermatologie': 'Dermatology',
+      'Neurologie': 'Neurology', 'Kardiologie': 'Cardiology', 'Pneumologie': 'Pulmonology',
+      'Gastroenterologie': 'Gastroenterology', 'Nephrologie': 'Nephrology',
+      'Hämatologie': 'Haematology', 'Onkologie': 'Oncology', 'Endokrinologie': 'Endocrinology',
+      'Rheumatologie': 'Rheumatology', 'Infektiologie': 'Infectious Diseases',
+      'Pädiatrie': 'Paediatrics', 'Psychiatrie': 'Psychiatry', 'Psychotherapie': 'Psychotherapy',
+      'Radiologie': 'Radiology', 'Augenheilkunde': 'Ophthalmology',
+      'HNO': 'ENT', 'Hals-Nasen-Ohren': 'ENT', 'Hals-Nasen-Ohren-Heilkunde': 'ENT',
+      'Zahnmedizin': 'Dentistry', 'Zahnarzt': 'Dentist', 'Zahnärztin': 'Dentist',
+      'Physiotherapie': 'Physiotherapy', 'Physikalische Medizin': 'Physical Medicine',
+      'Anästhesiologie': 'Anaesthesiology', 'Pathologie': 'Pathology',
+      'Geriatrie': 'Geriatrics', 'Labormedizin': 'Laboratory Medicine',
+      'Kinderwunsch / Fortpflanzungsmedizin': 'Fertility / Reproductive Medicine',
+      'Kinderwunsch': 'Fertility Medicine', 'Fortpflanzungsmedizin': 'Reproductive Medicine',
+    },
+    hu: {
+      'Allgemeinmedizin': 'Általános orvoslás', 'Innere Medizin': 'Belgyógyászat',
+      'Gynäkologie': 'Nőgyógyászat', 'Gynäkologie & Geburtshilfe': 'Nőgyógyászat és szülészet',
+      'Geburtshilfe': 'Szülészet', 'Urologie': 'Urológia', 'Orthopädie': 'Ortopédia',
+      'Unfallchirurgie': 'Traumatológia', 'Chirurgie': 'Sebészet',
+      'Plastische Chirurgie': 'Plasztikai sebészet', 'Neurochirurgie': 'Idegsebészet',
+      'Gefäßchirurgie': 'Érsebészet', 'Dermatologie': 'Bőrgyógyászat',
+      'Neurologie': 'Neurológia', 'Kardiologie': 'Kardiológia', 'Pneumologie': 'Pulmonológia',
+      'Gastroenterologie': 'Gasztroenterológia', 'Nephrologie': 'Nefrológia',
+      'Hämatologie': 'Hematológia', 'Onkologie': 'Onkológia', 'Endokrinologie': 'Endokrinológia',
+      'Rheumatologie': 'Reumatológia', 'Infektiologie': 'Infektológia',
+      'Pädiatrie': 'Gyermekgyógyászat', 'Psychiatrie': 'Pszichiátria', 'Psychotherapie': 'Pszichoterápia',
+      'Radiologie': 'Radiológia', 'Augenheilkunde': 'Szemészet',
+      'HNO': 'Fül-orr-gégészet', 'Hals-Nasen-Ohren': 'Fül-orr-gégészet', 'Hals-Nasen-Ohren-Heilkunde': 'Fül-orr-gégészet',
+      'Zahnmedizin': 'Fogászat', 'Zahnarzt': 'Fogorvos', 'Zahnärztin': 'Fogorvos',
+      'Physiotherapie': 'Fizioterápia', 'Physikalische Medizin': 'Fizikális medicina',
+      'Anästhesiologie': 'Aneszteziológia', 'Pathologie': 'Patológia',
+      'Geriatrie': 'Geriátria', 'Labormedizin': 'Laboratóriumi medicina',
+      'Kinderwunsch / Fortpflanzungsmedizin': 'Meddőségkezelés / Reproduktív medicina',
+      'Kinderwunsch': 'Meddőségkezelés', 'Fortpflanzungsmedizin': 'Reproduktív medicina',
+    },
+  };
+
+  function localizePartner(p, lang) {
+    var spec = p.specialty || '';
+    var addr = p.address || '';
+    if (lang !== 'de') {
+      spec = (SPECIALTY_MAP[lang] && SPECIALTY_MAP[lang][spec]) || spec;
+      addr = addr.replace(/\bWien\b/g, lang === 'en' ? 'Vienna' : 'Bécs');
+    }
+    return Object.assign({}, p, { specialty: spec, address: addr });
+  }
+
+  var _lastPartners = null;
   function renderPartners(partners) {
     var container = document.getElementById('partner-list-modal');
     if (!container) return;
+    _lastPartners = partners;
     if (!partners || partners.length === 0) {
       container.innerHTML = '<p style="color:#9a8e8a">Keine Partner eingetragen.</p>';
       return;
     }
+    var lang = currentLang || 'de';
     container.innerHTML = partners.map(function(p) {
+      p = localizePartner(p, lang);
       return '<div style="background:#faf7f4;border:0.5px solid #e8ddd8;border-radius:8px;padding:1.2rem 1.4rem;margin-bottom:1rem">' +
         '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem">' +
           '<div style="flex:1;min-width:0">' +
@@ -1464,6 +1734,72 @@
   }
 
   var BACKEND_URL = 'https://neumann-portal-backend.onrender.com';
+
+  async function loadOpeningHours() {
+    var DOW_DE = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+    var DOW_HU = ['Vasárnap','Hétfő','Kedd','Szerda','Csütörtök','Péntek','Szombat'];
+    var DOW_EN = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    function fmt12(t) {
+      var p = t.split(':'), h = parseInt(p[0]), m = p[1];
+      var ap = h >= 12 ? 'pm' : 'am'; h = h % 12 || 12;
+      return h + ':' + m + ' ' + ap;
+    }
+    function groupHours(hours, lang) {
+      var sorted = hours.slice().sort(function(a,b){ return (a.weekday||7)-(b.weekday||7); });
+      var groups = {}, order = [];
+      var DOW = lang==='hu' ? DOW_HU : lang==='en' ? DOW_EN : DOW_DE;
+      sorted.forEach(function(h) {
+        var key = h.time_from+'-'+h.time_to;
+        if (!groups[key]) { groups[key]={time_from:h.time_from,time_to:h.time_to,days:[]}; order.push(key); }
+        groups[key].days.push(DOW[h.weekday]);
+      });
+      return order.map(function(k) {
+        var g = groups[k];
+        var hs = lang==='en' ? fmt12(g.time_from)+' – '+fmt12(g.time_to)
+               : lang==='hu' ? g.time_from+' – '+g.time_to
+               : g.time_from+' – '+g.time_to+' Uhr';
+        return { days: g.days.join(' & '), hours_str: hs };
+      });
+    }
+    try {
+      var controller = new AbortController();
+      setTimeout(function(){ controller.abort(); }, 5000);
+      var resp = await fetch(BACKEND_URL + '/public/opening-hours', { signal: controller.signal });
+      if (!resp.ok) return;
+      var data = await resp.json();
+      if (!data.data || !data.data.length) return;
+      var michael = data.data.find(function(d){ return d.schedule_key==='michael'; });
+      var etelka  = data.data.find(function(d){ return d.schedule_key==='etelka';  });
+      ['de','hu','en'].forEach(function(lang) {
+        var t = LANG_DATA[lang]; if (!t) return;
+        if (michael && michael.hours && michael.hours.length) {
+          var g = groupHours(michael.hours, lang);
+          if (g[0]) { t.times.michael_days = g[0].days; t.times.michael_hours = g[0].hours_str; }
+        }
+        if (etelka && etelka.hours && etelka.hours.length) {
+          var g = groupHours(etelka.hours, lang);
+          if (g[0]) { t.times.etelka_days = g[0].days; t.times.etelka_hours = g[0].hours_str; }
+        }
+        if (t.kontakt && michael && etelka && michael.hours.length && etelka.hours.length) {
+          var mG = groupHours(michael.hours, lang), eG = groupHours(etelka.hours, lang);
+          var mN = michael.display_name||'OA Dr. Michael Neumann';
+          var eN = etelka.display_name||'OÄ Dr. Etelka Neumann';
+          var note = lang==='hu' ? 'Megbeszélés alapján az időpontokon kívül is lehetséges.'
+                   : lang==='en' ? 'Appointments by arrangement also possible outside these hours.'
+                   : 'Termine nach Vereinbarung auch außerhalb dieser Zeiten möglich.';
+          t.kontakt.times_body = '<strong>'+mN+'</strong><br>'
+            + mG.map(function(g){return g.days+', '+g.hours_str;}).join('<br>')
+            + '<br><br><strong>'+eN+'</strong><br>'
+            + eG.map(function(g){return g.days+', '+g.hours_str;}).join('<br>')
+            + '<br><br>'+note;
+        }
+      });
+      setLang(currentLang);
+    } catch(e) {
+      // Silently fall back to hardcoded defaults already in LANG_DATA
+      console.log('Opening hours API unavailable, using defaults');
+    }
+  }
 
   // Render beim Seitenload im Hintergrund aufwecken
   fetch(BACKEND_URL + '/', { method: 'GET', mode: 'cors' }).catch(function(){});
@@ -1492,11 +1828,11 @@
 <div class="modal-backdrop" id="modal-partner" onclick="if(event.target===this)closeModal()">
   <div class="modal-box" style="max-width:720px">
     <div class="modal-header">
-      <h2>Partnernetzwerk</h2>
+      <h2 id="modal-partner-title">Partnernetzwerk</h2>
       <button class="modal-close" onclick="closeModal()">&#x2715;</button>
     </div>
     <div class="modal-body">
-      <p style="margin-bottom:1.5rem;color:#5a4e4a">Wir arbeiten mit einem Netzwerk an Expertinnen und Experten aus anderen Fachbereichen zusammen.</p>
+      <p id="modal-partner-desc" style="margin-bottom:1.5rem;color:#5a4e4a">Wir arbeiten mit einem Netzwerk an Expertinnen und Experten aus anderen Fachbereichen zusammen.</p>
       <div id="partner-list-modal"><div style="text-align:center;padding:2rem;color:#9a8e8a">Wird geladen&#8230;</div></div>
     </div>
   </div>
@@ -1569,73 +1905,87 @@
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body">
-      <h3>Verantwortlicher</h3>
+      <h3>Verantwortliche</h3>
       <p>
-        <strong>Ordination Dr. Michael Neumann &amp; Dr. Etelka Neumann</strong><br>
-        OA Dr. Michael Neumann<br>
-        Facharzt für Gynäkologie und Geburtshilfe<br>
+        <strong>OA Dr. Michael Neumann &amp; OÄ Dr. Etelka Neumann</strong><br>
+        Fachärzte für Gynäkologie und Geburtshilfe<br>
         Hofstattgasse 17/3, 1180 Wien<br>
         Telefon: <a href="tel:+4314706559">+43 1 470 65 59</a><br>
-        E-Mail: <a href="mailto:info@helenini.at">info@helenini.at</a>
-      </p>
-
-      <h3>Grundsatz</h3>
-      <p>
-        Der Schutz Ihrer persönlichen Daten ist uns ein besonderes Anliegen. Wir verarbeiten Ihre Daten daher ausschließlich auf Grundlage der gesetzlichen Bestimmungen (DSGVO, TKG 2003).
+        E-Mail: <a href="mailto:ordination@frauenarzt-neumann.at">ordination@frauenarzt-neumann.at</a>
       </p>
 
       <h3>Welche Daten wir verarbeiten</h3>
       <p>Diese Website selbst speichert keine personenbezogenen Daten. Wenn Sie unser Patientenportal nutzen, werden folgende Daten erhoben:</p>
       <ul>
-        <li>Telefonnummer (zur Identifikation und Terminbestätigung)</li>
+        <li>Telefonnummer (zur Identifikation und Terminbestätigung per SMS)</li>
         <li>Name (freiwillig, zur persönlichen Ansprache)</li>
-        <li>E-Mail-Adresse (freiwillig, für Bestätigungen)</li>
-        <li>Versicherungsstatus (zur Terminplanung)</li>
-        <li>Ihre Anliegen und Anfragen</li>
+        <li>E-Mail-Adresse (freiwillig, für Terminbestätigungen)</li>
+        <li>Versicherungsstatus (Kasse / Privat, zur Terminplanung)</li>
+        <li>Anfragen und Anliegen, die Sie im Portal angeben</li>
+      </ul>
+      <p>Im Rahmen der ärztlichen Behandlung werden weiters verarbeitet:</p>
+      <ul>
+        <li>Rezepte und Befunde (Gesundheitsdaten gemäß Art. 9 DSGVO) – ausschließlich zur Bereitstellung im sicheren Patientenportal</li>
       </ul>
 
-      <h3>Zweck der Verarbeitung</h3>
+      <h3>Rechtsgrundlage</h3>
       <p>
-        Die Daten werden ausschließlich zur Terminvereinbarung, Bearbeitung von Anfragen und zur direkten Kommunikation mit Ihnen als Patientin verwendet. Eine Weitergabe an Dritte erfolgt nicht.
+        Die Verarbeitung von Kontaktdaten erfolgt auf Basis von Art. 6 Abs. 1 lit. b DSGVO (Vertragsanbahnung / Terminvereinbarung).<br>
+        Gesundheitsdaten (Rezepte, Befunde) werden auf Grundlage von Art. 9 Abs. 3 DSGVO i.V.m. §§ 9 ff. Ärztegesetz verarbeitet (Verarbeitung durch Gesundheitsdienstleister zur medizinischen Versorgung).
       </p>
+
+      <h3>Auftragsverarbeiter</h3>
+      <p>Wir setzen folgende technische Dienstleister ein, mit denen Auftragsverarbeitungsverträge (AVV) abgeschlossen wurden:</p>
+      <ul>
+        <li><strong>Render Inc.</strong> (Server-Hosting, Portal-Backend) – Rechenzentrum Frankfurt/EU; kein Drittlandtransfer</li>
+        <li><strong>Resend Inc.</strong> (E-Mail-Versand für Terminbestätigungen) – USA; Datentransfer auf Basis der EU-Standardvertragsklauseln (SCC)</li>
+        <li><strong>Twilio Inc.</strong> (SMS-Versand für Verifizierungscodes) – USA; Datentransfer auf Basis der EU-Standardvertragsklauseln (SCC)</li>
+        <li><strong>Functional Software Inc. (Sentry)</strong> (technisches Fehler-Monitoring) – Deutschland/EU; nur anonymisierte Fehlermeldungen, keine Patientendaten, IP-Adressen werden nicht gespeichert</li>
+      </ul>
+      <p>Die übermittelten Daten beschränken sich auf das für den jeweiligen Zweck erforderliche Minimum (Telefonnummer für SMS, E-Mail-Adresse für Bestätigungen). Gesundheitsdaten werden niemals per E-Mail oder SMS übertragen.</p>
 
       <h3>Speicherdauer</h3>
       <p>
-        Ihre Daten werden so lange gespeichert, wie dies für die Erfüllung der genannten Zwecke erforderlich ist. Gesundheitsdaten unterliegen gesetzlichen Aufbewahrungsfristen gemäß Ärztegesetz (mindestens 10 Jahre).
+        Kontaktdaten (Name, Telefon, E-Mail) werden gelöscht, sobald sie für den Buchungszweck nicht mehr erforderlich sind.<br>
+        Gesundheitsdaten (Rezepte, Befunde, Behandlungsdokumentation) unterliegen der gesetzlichen Aufbewahrungspflicht gemäß § 51 Ärztegesetz: <strong>mindestens 10 Jahre</strong> ab der letzten Behandlung.
       </p>
 
       <h3>Google Maps</h3>
       <p>
-        Diese Website verwendet Google Maps zur Darstellung des Anfahrtsplans. Anbieter ist Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland. Beim Aufrufen der Karte werden Daten an Google übertragen. Weitere Informationen finden Sie in der <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Datenschutzerklärung von Google</a>.
+        Diese Website verwendet Google Maps zur Darstellung des Anfahrtsplans. Anbieter ist Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland. Beim Aufrufen der Karte werden Daten an Google übertragen. Weitere Informationen: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Datenschutzerklärung von Google</a>.
       </p>
 
       <h3>Ihre Rechte</h3>
-      <p>Ihnen stehen bezüglich Ihrer bei uns gespeicherten Daten grundsätzlich folgende Rechte zu:</p>
+      <p>Ihnen stehen folgende Rechte zu:</p>
       <ul>
-        <li>Recht auf Auskunft (Art. 15 DSGVO)</li>
-        <li>Recht auf Berichtigung (Art. 16 DSGVO)</li>
-        <li>Recht auf Löschung (Art. 17 DSGVO)</li>
-        <li>Recht auf Einschränkung der Verarbeitung (Art. 18 DSGVO)</li>
-        <li>Recht auf Datenübertragbarkeit (Art. 20 DSGVO)</li>
-        <li>Recht auf Widerspruch (Art. 21 DSGVO)</li>
+        <li>Auskunft über Ihre gespeicherten Daten (Art. 15 DSGVO)</li>
+        <li>Berichtigung unrichtiger Daten (Art. 16 DSGVO)</li>
+        <li>Löschung („Recht auf Vergessenwerden", Art. 17 DSGVO) – soweit keine gesetzliche Aufbewahrungspflicht entgegensteht</li>
+        <li>Einschränkung der Verarbeitung (Art. 18 DSGVO)</li>
+        <li>Datenübertragbarkeit (Art. 20 DSGVO)</li>
+        <li>Widerspruch (Art. 21 DSGVO)</li>
       </ul>
-      <p>
-        Zur Ausübung dieser Rechte wenden Sie sich bitte an: <a href="mailto:info@helenini.at">info@helenini.at</a>
-      </p>
+      <p>Zur Ausübung Ihrer Rechte wenden Sie sich bitte an: <a href="mailto:ordination@frauenarzt-neumann.at">ordination@frauenarzt-neumann.at</a></p>
 
       <h3>Beschwerderecht</h3>
       <p>
         Sie haben das Recht, sich bei der österreichischen Datenschutzbehörde zu beschweren:<br>
-        Österreichische Datenschutzbehörde<br>
-        Barichgasse 40–42, 1030 Wien<br>
+        Österreichische Datenschutzbehörde, Barichgasse 40–42, 1030 Wien<br>
         <a href="https://www.dsb.gv.at" target="_blank" rel="noopener noreferrer">www.dsb.gv.at</a>
       </p>
 
       <p style="margin-top:1.5rem;font-size:0.78rem;color:var(--stone-light)">
-        Stand: Juni 2026 · Kein Cookie-Banner erforderlich, da keine Tracking-Cookies verwendet werden.
+        Stand: Juli 2026 · Diese Website verwendet keine Tracking-Cookies und benötigt daher keinen Cookie-Banner.
       </p>
     </div>
   </div>
+</div>
+
+<!-- Sticky mobile portal button -->
+<div id="sticky-portal-bar">
+  <a id="sticky-portal-btn" href="https://portal.helenini.at?lang=de" class="portal-link" target="_blank" rel="noopener noreferrer">
+    Jetzt Termin buchen →
+  </a>
 </div>
 
 </body>
