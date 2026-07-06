@@ -1879,7 +1879,7 @@
     try {
       var ctrl = new AbortController();
       setTimeout(function(){ ctrl.abort(); }, 5000);
-      var resp = await fetch(BACKEND_URL + '/public/display-photos', { signal: ctrl.signal });
+      var resp = await fetch(BACKEND_URL + '/public/website-photos', { signal: ctrl.signal });
       if (!resp.ok) return;
       var data = await resp.json();
       var photos = data.photos || [];
