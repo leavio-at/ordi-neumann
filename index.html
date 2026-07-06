@@ -816,21 +816,21 @@
       <span class="label" id="times-title">Ordinationszeiten</span>
       <div class="times-row">
         <div class="times-doc">
-          <div class="times-doc-name">OA Dr. Michael Neumann</div>
+          <div class="times-doc-name" id="times-doc-name-m">OA Dr. Michael Neumann</div>
           <div class="times-doc-day" id="times-m-days">Dienstag & Mittwoch</div>
           <div class="times-doc-hours" id="times-m-hours">14:00 – 19:00 Uhr</div>
           <span class="times-doc-ins" id="times-m-ins">BVAEB · KFA · Privat</span>
         </div>
         <div class="times-doc">
-          <div class="times-doc-name">OÄ Dr. Etelka Neumann</div>
+          <div class="times-doc-name" id="times-doc-name-e">OÄ Dr. Etelka Neumann</div>
           <div class="times-doc-day" id="times-e-days">Montag & Donnerstag</div>
           <div class="times-doc-hours" id="times-e-hours">11:00 – 18:00 Uhr</div>
           <span class="times-doc-ins" id="times-e-ins">KFA · Privat · Magyar</span>
         </div>
       </div>
       <div class="times-contact">
-        <span>📞 <a href="tel:+4314706559">+43 1 470 65 59</a></span>
-        <span>✉ <a href="mailto:info@helenini.at">info@helenini.at</a></span>
+        <span>📞 <a id="times-phone-a" href="tel:+4314706559">+43 1 470 65 59</a></span>
+        <span>✉ <a id="times-email-a" href="mailto:info@helenini.at">info@helenini.at</a></span>
         <span id="times-addr">📍 Hofstattgasse 17/3, 1180 Wien</span>
       </div>
     </div>
@@ -922,11 +922,11 @@
       <!-- Michael -->
       <div class="arzt-card">
         <div class="arzt-photo-wrap">
-          <img class="arzt-photo-img" src="dr-michael.jpg" alt="OA Dr. Michael Neumann" loading="lazy">
+          <img id="arzt-photo-m" class="arzt-photo-img" src="dr-michael.jpg" alt="OA Dr. Michael Neumann" loading="lazy">
           <div class="arzt-photo-bar"></div>
         </div>
         <span class="label arzt-role" id="arzt-m-role">Frauenarzt</span>
-        <h3 class="arzt-name">OA Dr. Michael Neumann</h3>
+        <h3 class="arzt-name" id="arzt-name-m">OA Dr. Michael Neumann</h3>
         <p class="arzt-bio" id="arzt-m-bio">
           OA Dr. Michael Neumann hat in seiner beruflichen Laufbahn über 8.000 Schwangerschaften und Geburten begleitet und über 5.000 Operationen durchgeführt. Seine Patientinnen schätzen neben seiner beruflichen Kompetenz auch seine freundliche, einfühlsame und humorvolle Art.
           <br><br>
@@ -947,11 +947,11 @@
       <!-- Etelka -->
       <div class="arzt-card">
         <div class="arzt-photo-wrap">
-          <img class="arzt-photo-img" src="dr-etelka.jpg" alt="OÄ Dr. Etelka Neumann" loading="lazy">
+          <img id="arzt-photo-e" class="arzt-photo-img" src="dr-etelka.jpg" alt="OÄ Dr. Etelka Neumann" loading="lazy">
           <div class="arzt-photo-bar"></div>
         </div>
         <span class="label arzt-role" id="arzt-e-role">Frauenärztin</span>
-        <h3 class="arzt-name">OÄ Dr. Etelka Neumann</h3>
+        <h3 class="arzt-name" id="arzt-name-e">OÄ Dr. Etelka Neumann</h3>
         <p class="arzt-bio" id="arzt-e-bio" id="arzt-m-bio">
           OÄ Dr. Etelka Neumann weist eine über 30-jährige Erfahrung in der Geburtshilfe und Frauenheilkunde auf. Ihre Patientinnen schätzen ihre professionelle und sanfte Art, ihre hohe Empathie und ihre profunde Erfahrung.
           <br><br>
@@ -1074,8 +1074,8 @@
       <div class="kontakt-block">
         <span class="label" id="kontakt-tel-title">Telefon & E-Mail</span>
         <p>
-          <a href="tel:+4314706559">+43 1 470 65 59</a> <span id="kontakt-tel-hours">während der Ordinationszeiten</span><br>
-          <a href="mailto:info@helenini.at">info@helenini.at</a>
+          <a id="kontakt-phone-a" href="tel:+4314706559">+43 1 470 65 59</a> <span id="kontakt-tel-hours">während der Ordinationszeiten</span><br>
+          <a id="kontakt-email-a" href="mailto:info@helenini.at">info@helenini.at</a>
         </p>
       </div>
 
@@ -1613,7 +1613,9 @@
 
   // Init language
   setLang('de');
-  loadOpeningHours();
+  // Load dynamic data: opening hours first (populates _doctorIdMap), then photos
+  loadOpeningHours().then(function() { loadDoctorPhotos(); });
+  loadPracticeSettings();
 
   // Subtle scroll animation
   const observer = new IntersectionObserver((entries) => {
@@ -1770,6 +1772,25 @@
       if (!data.data || !data.data.length) return;
       var michael = data.data.find(function(d){ return d.schedule_key==='michael'; });
       var etelka  = data.data.find(function(d){ return d.schedule_key==='etelka';  });
+
+      // Store IDs for photo matching
+      if (michael && michael.id) _doctorIdMap['michael'] = michael.id;
+      if (etelka  && etelka.id)  _doctorIdMap['etelka']  = etelka.id;
+
+      // Update doctor name elements directly in the DOM
+      var mName = michael && michael.display_name ? michael.display_name : null;
+      var eName = etelka  && etelka.display_name  ? etelka.display_name  : null;
+      if (mName) {
+        var el1 = document.getElementById('times-doc-name-m'); if (el1) el1.textContent = mName;
+        var el2 = document.getElementById('arzt-name-m');      if (el2) el2.textContent = mName;
+        var img1 = document.getElementById('arzt-photo-m');    if (img1) img1.alt = mName;
+      }
+      if (eName) {
+        var el3 = document.getElementById('times-doc-name-e'); if (el3) el3.textContent = eName;
+        var el4 = document.getElementById('arzt-name-e');      if (el4) el4.textContent = eName;
+        var img2 = document.getElementById('arzt-photo-e');    if (img2) img2.alt = eName;
+      }
+
       ['de','hu','en'].forEach(function(lang) {
         var t = LANG_DATA[lang]; if (!t) return;
         if (michael && michael.hours && michael.hours.length) {
@@ -1798,6 +1819,89 @@
     } catch(e) {
       // Silently fall back to hardcoded defaults already in LANG_DATA
       console.log('Opening hours API unavailable, using defaults');
+    }
+  }
+
+  // ── PRAXISEINSTELLUNGEN DYNAMISCH LADEN ───────────────────────
+  async function loadPracticeSettings() {
+    try {
+      var ctrl = new AbortController();
+      setTimeout(function(){ ctrl.abort(); }, 5000);
+      var resp = await fetch(BACKEND_URL + '/public/settings', { signal: ctrl.signal });
+      if (!resp.ok) return;
+      var data = await resp.json();
+      var s = data.settings || {};
+
+      // Phone: href (digits only) + display text
+      var phoneRaw  = s.practice_phone_link || s.practice_phone || '';
+      var phoneTxt  = s.practice_phone || '';
+      if (phoneTxt) {
+        ['times-phone-a','kontakt-phone-a'].forEach(function(id) {
+          var a = document.getElementById(id);
+          if (!a) return;
+          if (phoneRaw) a.href = 'tel:' + phoneRaw.replace(/[^\d+]/g,'');
+          a.textContent = phoneTxt;
+        });
+      }
+
+      // Email
+      var email = s.practice_email || '';
+      if (email) {
+        ['times-email-a','kontakt-email-a'].forEach(function(id) {
+          var a = document.getElementById(id);
+          if (!a) return;
+          a.href = 'mailto:' + email;
+          a.textContent = email;
+        });
+      }
+
+      // Address in times bar
+      var addr = s.practice_address || '';
+      if (addr) {
+        var addrEl = document.getElementById('times-addr');
+        if (addrEl) addrEl.textContent = '📍 ' + addr;
+        // Also update TX addr fields so language switching stays consistent
+        ['de','hu','en'].forEach(function(lang) {
+          var t = LANG_DATA[lang]; if (!t || !t.times) return;
+          var suffix = lang === 'en' ? ' Vienna' : lang === 'hu' ? ' Bécs' : ' Wien';
+          t.times.addr = '📍 ' + addr;
+        });
+      }
+    } catch(e) {
+      console.log('Practice settings API unavailable, using defaults');
+    }
+  }
+
+  // ── ARZTFOTOS DYNAMISCH LADEN ──────────────────────────────────
+  // doctorIdMap wird von loadOpeningHours befüllt: { schedule_key → user_id }
+  var _doctorIdMap = {};
+  async function loadDoctorPhotos() {
+    try {
+      var ctrl = new AbortController();
+      setTimeout(function(){ ctrl.abort(); }, 5000);
+      var resp = await fetch(BACKEND_URL + '/public/display-photos', { signal: ctrl.signal });
+      if (!resp.ok) return;
+      var data = await resp.json();
+      var photos = data.photos || [];
+
+      // Match user photos to doctors
+      var photoById = {};
+      photos.filter(function(p){ return p.category === 'user' && p.user_id; })
+            .forEach(function(p){ photoById[p.user_id] = p; });
+
+      var MAP = { michael: 'arzt-photo-m', etelka: 'arzt-photo-e' };
+      Object.keys(_doctorIdMap).forEach(function(key) {
+        var userId = _doctorIdMap[key];
+        var photo  = photoById[userId];
+        var imgId  = MAP[key];
+        if (!photo || !imgId) return;
+        var img = document.getElementById(imgId);
+        if (!img) return;
+        var newSrc = BACKEND_URL + '/public/photos/' + photo.id;
+        if (img.src !== newSrc) img.src = newSrc;
+      });
+    } catch(e) {
+      console.log('Doctor photos API unavailable, using static files');
     }
   }
 
