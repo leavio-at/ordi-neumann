@@ -404,7 +404,7 @@
   }
   .team-atmo-item img {
     width: 100%; height: 100%;
-    object-fit: cover; object-position: center;
+    object-fit: cover; object-position: 50% 50%;
     display: block;
     transition: transform 0.5s ease;
   }
@@ -1999,6 +1999,7 @@
           img.src = BACKEND_URL + '/public/photos/' + p.id;
           img.alt = p.label || 'Ordination';
           img.loading = 'lazy';
+          img.style.objectPosition = '50% ' + (p.focal_y != null ? p.focal_y : 50) + '%';
           item.appendChild(img);
           if (p.label) {
             var cap = document.createElement('div');
