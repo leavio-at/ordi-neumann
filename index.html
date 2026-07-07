@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; frame-src https://www.google.com https://maps.google.com https://www.google.com/maps/; img-src 'self' data: https:; connect-src https://fonts.googleapis.com https://fonts.gstatic.com https://neumann-portal-backend.onrender.com;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
-<meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
 <meta name="description" content="OA Dr. Michael Neumann & OÄ Dr. Etelka Neumann – Gynäkologie und Geburtshilfe in 1180 Wien. Über 35 Jahre Erfahrung. Jetzt online Termin anfragen.">
@@ -54,8 +53,8 @@
 </script>
   <!-- TEST-VERSION: helenini.at – Zieldomain: frauenarzt-neumann.at -->
 <title>Ordination Dr. Neumann – Gynäkologie Wien 18</title>
-<link rel="icon" type="image/png" href="logo-neumann.png">
-<link rel="apple-touch-icon" href="logo-neumann.png">
+<link rel="icon" type="image/png" href="https://neumann-portal-backend.onrender.com/public/logo">
+<link rel="apple-touch-icon" href="https://neumann-portal-backend.onrender.com/public/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -975,7 +974,7 @@
     <!-- Elena -->
     <div class="elena-row">
       <div class="elena-photo-wrap">
-        <img src="elena.jpg" alt="Elena, Ordinationsassistenz" loading="lazy">
+        <img id="elena-photo" src="elena.jpg" alt="Elena, Ordinationsassistenz" loading="lazy">
         <div class="elena-bar"></div>
       </div>
       <div class="elena-info">
@@ -990,12 +989,12 @@
     <!-- Atmosphäre -->
     <div class="team-atmo">
       <div class="team-atmo-item">
-        <img src="team-beide.jpg" alt="OA Dr. Michael Neumann und OÄ Dr. Etelka Neumann" loading="lazy">
-        <div class="team-atmo-caption">Dr. Michael &amp; Dr. Etelka Neumann</div>
+        <img id="team-both-img" src="team-beide.jpg" alt="OA Dr. Michael Neumann und OÄ Dr. Etelka Neumann" loading="lazy">
+        <div id="team-both-caption" class="team-atmo-caption">Dr. Michael &amp; Dr. Etelka Neumann</div>
       </div>
       <div class="team-atmo-item">
         <img src="team-etelka-elena-2.jpg" alt="Dr. Etelka Neumann und Elena" loading="lazy" style="object-position: center 12%;">
-        <div class="team-atmo-caption">Dr. Etelka Neumann &amp; Elena</div>
+        <div id="team-etelka-caption" class="team-atmo-caption">Dr. Etelka Neumann &amp; Elena</div>
       </div>
     </div>
 
@@ -1611,6 +1610,8 @@
   }
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
+  var BACKEND_URL = 'https://neumann-portal-backend.onrender.com';
+
   // Init language
   setLang('de');
   // Load dynamic data: opening hours first (populates _doctorIdMap), then photos
@@ -1735,7 +1736,7 @@
     }).join('');
   }
 
-  var BACKEND_URL = 'https://neumann-portal-backend.onrender.com';
+
 
   async function loadOpeningHours() {
     var DOW_DE = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
@@ -1765,7 +1766,7 @@
     }
     try {
       var controller = new AbortController();
-      setTimeout(function(){ controller.abort(); }, 5000);
+      setTimeout(function(){ controller.abort(); }, 30000);
       var resp = await fetch(BACKEND_URL + '/public/opening-hours', { signal: controller.signal });
       if (!resp.ok) return;
       var data = await resp.json();
@@ -1815,6 +1816,39 @@
             + '<br><br>'+note;
         }
       });
+
+      // Replace hardcoded doctor names in remaining LANG_DATA fields (hero.sub, team bios)
+      var _defM = 'OA Dr. Michael Neumann';
+      var _defE = 'OÄ Dr. Etelka Neumann';
+      var _replaceNames = function(s) {
+        if (!s) return s;
+        if (mName) s = s.split(_defM).join(mName);
+        if (eName) s = s.split(_defE).join(eName);
+        return s;
+      };
+      ['de','hu','en'].forEach(function(lang) {
+        var t = LANG_DATA[lang]; if (!t) return;
+        if (t.hero)  t.hero.sub   = _replaceNames(t.hero.sub);
+        if (t.team) { t.team.m_bio = _replaceNames(t.team.m_bio); t.team.e_bio = _replaceNames(t.team.e_bio); }
+      });
+
+      // Team photo alt text + captions
+      var _shortDn = function(dn) { var m = dn.match(/Dr\.\s+.+$/); return m ? m[0] : dn; };
+      var _tbi = document.getElementById('team-both-img');
+      if (_tbi && mName && eName) _tbi.alt = mName + ' und ' + eName;
+      var _tbc = document.getElementById('team-both-caption');
+      if (_tbc && mName && eName) _tbc.textContent = _shortDn(mName) + ' & ' + _shortDn(eName);
+      var _tec = document.getElementById('team-etelka-caption');
+      if (_tec && eName) _tec.textContent = _shortDn(eName) + ' & Elena';
+
+      // Impressum
+      var _imp = document.getElementById('impressum-arzt-body');
+      if (_imp) _imp.innerHTML = _replaceNames(_imp.innerHTML);
+
+      // Datenschutz
+      var _dv = document.getElementById('datenschutz-verantwortliche');
+      if (_dv) _dv.innerHTML = _replaceNames(_dv.innerHTML);
+
       setLang(currentLang);
     } catch(e) {
       // Silently fall back to hardcoded defaults already in LANG_DATA
@@ -1826,7 +1860,7 @@
   async function loadPracticeSettings() {
     try {
       var ctrl = new AbortController();
-      setTimeout(function(){ ctrl.abort(); }, 5000);
+      setTimeout(function(){ ctrl.abort(); }, 30000);
       var resp = await fetch(BACKEND_URL + '/public/settings', { signal: ctrl.signal });
       if (!resp.ok) return;
       var data = await resp.json();
@@ -1878,28 +1912,57 @@
   async function loadDoctorPhotos() {
     try {
       var ctrl = new AbortController();
-      setTimeout(function(){ ctrl.abort(); }, 5000);
+      setTimeout(function(){ ctrl.abort(); }, 30000);
       var resp = await fetch(BACKEND_URL + '/public/website-photos', { signal: ctrl.signal });
       if (!resp.ok) return;
       var data = await resp.json();
       var photos = data.photos || [];
 
-      // Match user photos to doctors
-      var photoById = {};
-      photos.filter(function(p){ return p.category === 'user' && p.user_id; })
-            .forEach(function(p){ photoById[p.user_id] = p; });
+      // username → img element id mapping (covers doctors + assistant)
+      var USERNAME_MAP = {
+        'dr-neumann-m': 'arzt-photo-m',
+        'dr-neumann-e': 'arzt-photo-e',
+        'elena':        'elena-photo'
+      };
 
-      var MAP = { michael: 'arzt-photo-m', etelka: 'arzt-photo-e' };
-      Object.keys(_doctorIdMap).forEach(function(key) {
-        var userId = _doctorIdMap[key];
-        var photo  = photoById[userId];
-        var imgId  = MAP[key];
+      // Use first photo per username (most recently uploaded with for_website=1)
+      var photoByUsername = {};
+      photos.filter(function(p){ return p.category === 'user' && p.username; })
+            .forEach(function(p){
+              if (!photoByUsername[p.username]) photoByUsername[p.username] = p;
+            });
+
+      Object.keys(USERNAME_MAP).forEach(function(username) {
+        var photo = photoByUsername[username];
+        var imgId = USERNAME_MAP[username];
         if (!photo || !imgId) return;
         var img = document.getElementById(imgId);
         if (!img) return;
         var newSrc = BACKEND_URL + '/public/photos/' + photo.id;
         if (img.src !== newSrc) img.src = newSrc;
       });
+
+      // Ordinations-Fotos in die Team-Atmo-Sektion laden
+      var atmo = document.querySelector('.team-atmo');
+      if (atmo) {
+        var ordPhotos = photos.filter(function(p) { return p.category === 'ordination'; });
+        ordPhotos.forEach(function(p) {
+          var item = document.createElement('div');
+          item.className = 'team-atmo-item';
+          var img = document.createElement('img');
+          img.src = BACKEND_URL + '/public/photos/' + p.id;
+          img.alt = p.label || 'Ordination';
+          img.loading = 'lazy';
+          item.appendChild(img);
+          if (p.label) {
+            var cap = document.createElement('div');
+            cap.className = 'team-atmo-caption';
+            cap.textContent = p.label;
+            item.appendChild(cap);
+          }
+          atmo.appendChild(item);
+        });
+      }
     } catch(e) {
       console.log('Doctor photos API unavailable, using static files');
     }
@@ -1951,7 +2014,7 @@
     </div>
     <div class="modal-body">
       <h3>Angaben gemäß § 5 ECG</h3>
-      <p id="kontakt-times-body">
+      <p id="impressum-arzt-body">
           <strong>OA Dr. Michael Neumann</strong><br>
         Facharzt für Gynäkologie und Geburtshilfe<br>
         Hofstattgasse 17/3<br>
@@ -2010,7 +2073,7 @@
     </div>
     <div class="modal-body">
       <h3>Verantwortliche</h3>
-      <p>
+      <p id="datenschutz-verantwortliche">
         <strong>OA Dr. Michael Neumann &amp; OÄ Dr. Etelka Neumann</strong><br>
         Fachärzte für Gynäkologie und Geburtshilfe<br>
         Hofstattgasse 17/3, 1180 Wien<br>
@@ -2091,6 +2154,16 @@
     Jetzt Termin buchen →
   </a>
 </div>
+
+<script>
+// Logo dynamisch vom Portal laden (ersetzt logo-neumann.png img-Tags)
+(function() {
+  var logoImgs = document.querySelectorAll('img[src="logo-neumann.png"]');
+  logoImgs.forEach(function(img) {
+    img.src = 'https://neumann-portal-backend.onrender.com/public/logo';
+  });
+})();
+</script>
 
 </body>
 </html>
