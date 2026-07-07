@@ -1905,7 +1905,7 @@
       var phoneRaw  = s.practice_phone_link || s.practice_phone || '';
       var phoneTxt  = s.practice_phone || '';
       if (phoneTxt) {
-        ['times-phone-a','kontakt-phone-a'].forEach(function(id) {
+        ['times-phone-a','kontakt-phone-a','impressum-phone-a'].forEach(function(id) {
           var a = document.getElementById(id);
           if (!a) return;
           if (phoneRaw) a.href = 'tel:' + phoneRaw.replace(/[^\d+]/g,'');
@@ -1916,12 +1916,22 @@
       // Email
       var email = s.practice_email || '';
       if (email) {
-        ['times-email-a','kontakt-email-a'].forEach(function(id) {
+        ['times-email-a','kontakt-email-a','impressum-email-a'].forEach(function(id) {
           var a = document.getElementById(id);
           if (!a) return;
           a.href = 'mailto:' + email;
           a.textContent = email;
         });
+      }
+
+      // Website
+      var website = s.practice_website || '';
+      if (website) {
+        var impWebA = document.getElementById('impressum-website-a');
+        if (impWebA) {
+          impWebA.href = website;
+          impWebA.textContent = website.replace(/^https?:\/\/(www\.)?/, '');
+        }
       }
 
       // Address in times bar
@@ -2059,9 +2069,9 @@
 
       <h3>Kontakt</h3>
       <p>
-        Telefon: <a href="tel:+4314706559">+43 1 470 65 59</a><br>
-        E-Mail: <a href="mailto:info@helenini.at">info@helenini.at</a><br>
-        Website: <a href="https://www.helenini.at">www.helenini.at</a>
+        Telefon: <a id="impressum-phone-a" href="tel:+4314706559">+43 1 470 65 59</a><br>
+        E-Mail: <a id="impressum-email-a" href="mailto:info@helenini.at">info@helenini.at</a><br>
+        Website: <a id="impressum-website-a" href="https://www.helenini.at">www.helenini.at</a>
       </p>
 
       <h3>Berufsrecht</h3>
