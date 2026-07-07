@@ -958,7 +958,7 @@
         </p>
         <div class="arzt-schwerpunkte">
           <span class="label" id="arzt-e-schwerpunkte">Schwerpunkte</span>
-          <div class="schwerpunkt-tags">
+          <div class="schwerpunkt-tags" id="arzt-e-tags">
             <span class="schwerpunkt-tag">Hormone</span>
             <span class="schwerpunkt-tag" id="arzt-e-tag-1">First Love Beratung</span>
             <span class="schwerpunkt-tag" id="arzt-e-tag-2">Kinderwunsch</span>
@@ -1848,6 +1848,50 @@
       // Datenschutz
       var _dv = document.getElementById('datenschutz-verantwortliche');
       if (_dv) _dv.innerHTML = _replaceNames(_dv.innerHTML);
+
+      // Kassen dynamisch aktualisieren (aus API-Daten)
+      var _KORD = ['oegk','svs','bvaeb','kfa','privat'];
+      var _KDE = { oegk:'ÖGK', svs:'SVS', bvaeb:'BVAEB', kfa:'KFA', privat:'Privat' };
+      var _KHU = { oegk:'ÖGK', svs:'SVS', bvaeb:'BVA',   kfa:'KFA', privat:'Magán'  };
+      var _KEN = { oegk:'ÖGK', svs:'SVS', bvaeb:'BVAEB', kfa:'KFA', privat:'Private' };
+      function _insLabel(kassenArr, kMap) {
+        return _KORD.filter(function(k){ return kassenArr.indexOf(k) >= 0; })
+                    .map(function(k){ return kMap[k]||k.toUpperCase(); }).join(' · ');
+      }
+      var _mK = michael && michael.kassen ? (function(){ try{ return JSON.parse(michael.kassen); }catch(e){ return []; } })() : [];
+      var _eK = etelka  && etelka.kassen  ? (function(){ try{ return JSON.parse(etelka.kassen);  }catch(e){ return []; } })() : [];
+      if (_mK.length || _eK.length) {
+        var _insMap = {
+          de: { m: _insLabel(_mK, _KDE), e: _insLabel(_eK, _KDE) },
+          hu: { m: _insLabel(_mK, _KHU), e: _insLabel(_eK, _KHU) },
+          en: { m: _insLabel(_mK, _KEN), e: _insLabel(_eK, _KEN) }
+        };
+        // LANG_DATA für Sprachumschalter aktualisieren
+        ['de','hu','en'].forEach(function(lang) {
+          var t = LANG_DATA[lang]; if (!t) return;
+          if (_insMap[lang].m && t.times) t.times.michael_ins = _insMap[lang].m;
+          if (_insMap[lang].e && t.times) t.times.etelka_ins  = _insMap[lang].e;
+          // Schwerpunkt-Tags: letztes Element für Michael
+          if (_insMap[lang].m && t.schwerpunkte_m && t.schwerpunkte_m.length) {
+            t.schwerpunkte_m = t.schwerpunkte_m.slice(0,-1).concat([_insMap[lang].m]);
+          }
+        });
+        // DOM direkt aktualisieren
+        var _cl = currentLang || 'de';
+        var _ci = _insMap[_cl] || _insMap.de;
+        if (_ci.m) { var _elm = document.getElementById('times-m-ins'); if (_elm) _elm.textContent = _ci.m; }
+        if (_ci.e) { var _ele = document.getElementById('times-e-ins'); if (_ele) _ele.textContent = _ci.e; }
+        // Schwerpunkt-Tag Michael (letzter Tag im Container)
+        if (_ci.m) {
+          var _mTags = document.getElementById('arzt-m-tags');
+          if (_mTags) { var _lt = _mTags.querySelector('span.schwerpunkt-tag:last-child'); if (_lt) _lt.textContent = _ci.m; }
+        }
+        // Schwerpunkt-Tag Etelka
+        if (_ci.e) {
+          var _eTags = document.getElementById('arzt-e-tags');
+          if (_eTags) { var _ltE = _eTags.querySelector('span.schwerpunkt-tag:last-child'); if (_ltE) _ltE.textContent = _ci.e; }
+        }
+      }
 
       setLang(currentLang);
     } catch(e) {
