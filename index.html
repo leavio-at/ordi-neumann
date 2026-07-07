@@ -986,17 +986,8 @@
       </div>
     </div>
 
-    <!-- Atmosphäre -->
-    <div class="team-atmo">
-      <div class="team-atmo-item">
-        <img id="team-both-img" src="team-beide.jpg" alt="OA Dr. Michael Neumann und OÄ Dr. Etelka Neumann" loading="lazy">
-        <div id="team-both-caption" class="team-atmo-caption">Dr. Michael &amp; Dr. Etelka Neumann</div>
-      </div>
-      <div class="team-atmo-item">
-        <img src="team-etelka-elena-2.jpg" alt="Dr. Etelka Neumann und Elena" loading="lazy" style="object-position: center 12%;">
-        <div id="team-etelka-caption" class="team-atmo-caption">Dr. Etelka Neumann &amp; Elena</div>
-      </div>
-    </div>
+    <!-- Atmosphäre – wird dynamisch aus dem Portal geladen -->
+    <div class="team-atmo" id="team-atmo-grid"></div>
 
   </div>
 </section>
@@ -1987,9 +1978,10 @@
       });
 
       // Ordinations-Fotos in die Team-Atmo-Sektion laden
-      var atmo = document.querySelector('.team-atmo');
+      var atmo = document.getElementById('team-atmo-grid') || document.querySelector('.team-atmo');
       if (atmo) {
         var ordPhotos = photos.filter(function(p) { return p.category === 'ordination'; });
+        atmo.innerHTML = '';
         ordPhotos.forEach(function(p) {
           var item = document.createElement('div');
           item.className = 'team-atmo-item';
