@@ -1638,6 +1638,26 @@
   loadOpeningHours().then(function() { loadDoctorPhotos(); });
   loadPracticeSettings();
 
+  // ── Privacy-friendly Analytics (keine Cookies, kein Tracking-Banner nötig) ──
+  function trackEvent(type, target) {
+    try {
+      fetch(BACKEND_URL + '/track', {
+        method: 'POST', mode: 'cors', keepalive: true,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: type, path: location.pathname + location.hash, target: target || null, ref: document.referrer || '' })
+      }).catch(function(){});
+    } catch (e) {}
+  }
+  trackEvent('pageview');
+  ['times-phone-a','kontakt-phone-a','impressum-phone-a'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('click', function() { trackEvent('contact_click', 'phone'); });
+  });
+  ['times-email-a','kontakt-email-a','impressum-email-a'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('click', function() { trackEvent('contact_click', 'email'); });
+  });
+
   // Subtle scroll animation
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(e => {
@@ -2154,7 +2174,7 @@
         Fachärzte für Gynäkologie und Geburtshilfe<br>
         Hofstattgasse 17/3, 1180 Wien<br>
         Telefon: <a href="tel:+4314706559">+43 1 470 65 59</a><br>
-        E-Mail: <a href="mailto:ordination@frauenarzt-neumann.at">ordination@frauenarzt-neumann.at</a>
+        E-Mail: <a href="mailto:ordi@frauenarzt-neumann.at">ordi@frauenarzt-neumann.at</a>
       </p>
 
       <h3>Welche Daten wir verarbeiten</h3>
@@ -2208,13 +2228,21 @@
         <li>Datenübertragbarkeit (Art. 20 DSGVO)</li>
         <li>Widerspruch (Art. 21 DSGVO)</li>
       </ul>
-      <p>Zur Ausübung Ihrer Rechte wenden Sie sich bitte an: <a href="mailto:ordination@frauenarzt-neumann.at">ordination@frauenarzt-neumann.at</a></p>
+      <p>Zur Ausübung Ihrer Rechte wenden Sie sich bitte an: <a href="mailto:ordi@frauenarzt-neumann.at">ordi@frauenarzt-neumann.at</a></p>
 
       <h3>Beschwerderecht</h3>
       <p>
         Sie haben das Recht, sich bei der österreichischen Datenschutzbehörde zu beschweren:<br>
         Österreichische Datenschutzbehörde, Barichgasse 40–42, 1030 Wien<br>
         <a href="https://www.dsb.gv.at" target="_blank" rel="noopener noreferrer">www.dsb.gv.at</a>
+      </p>
+
+      <h3>Reichweitenmessung</h3>
+      <p>
+        Diese Website verwendet keine Cookies. Zur anonymen Reichweitenmessung werden Seitenaufrufe und Klicks auf
+        Kontaktlinks serverseitig erfasst; dabei wird aus IP-Adresse, Browserkennung und Datum ein täglich rotierender
+        Hash-Wert gebildet, die IP-Adresse selbst wird nicht gespeichert. Die Daten werden nach maximal 400 Tagen
+        automatisch gelöscht.
       </p>
 
       <p style="margin-top:1.5rem;font-size:0.78rem;color:var(--stone-light)">
