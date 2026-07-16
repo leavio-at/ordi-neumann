@@ -1643,7 +1643,7 @@
     try {
       fetch(BACKEND_URL + '/track', {
         method: 'POST', mode: 'cors', keepalive: true,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({ type: type, path: location.pathname + location.hash, target: target || null, ref: document.referrer || '' })
       }).catch(function(){});
     } catch (e) {}
@@ -1657,6 +1657,13 @@
     var el = document.getElementById(id);
     if (el) el.addEventListener('click', function() { trackEvent('contact_click', 'email'); });
   });
+  document.querySelectorAll('.portal-link').forEach(function(el) {
+    el.addEventListener('click', function() { trackEvent('portal_click'); });
+  });
+  // Echtzeit-"gerade online"-Zähler: kurzer Lebenszeichen-Puls, solange der Tab sichtbar ist
+  setInterval(function() {
+    if (document.visibilityState === 'visible') trackEvent('heartbeat');
+  }, 25000);
 
   // Subtle scroll animation
   const observer = new IntersectionObserver((entries) => {
