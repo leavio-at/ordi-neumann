@@ -740,7 +740,7 @@
       <span style="color:var(--border)">|</span>
       <a href="#" class="nav-lang-btn" data-lang="en" onclick="setLang('en');return false;" style="font-size:0.72rem;font-weight:500;letter-spacing:0.08em;color:var(--stone-light)">EN</a>
     </div>
-    <a href="https://portal.helenini.at?lang=de" id="nav-portal" class="portal-link nav-cta" target="_blank" rel="noopener noreferrer">Online Portal</a>
+    <a href="https://portal.frauenarzt-neumann.at?lang=de" id="nav-portal" class="portal-link nav-cta" target="_blank" rel="noopener noreferrer">Online Portal</a>
   </div>
   <div style="display:none;align-items:center;gap:10px" class="mobile-controls">
     <div style="display:flex;gap:2px;border:0.5px solid var(--border);border-radius:3px;overflow:hidden">
@@ -772,7 +772,7 @@
       OA Dr. Michael Neumann und OÄ Dr. Etelka Neumann betreuen Frauen aller Altersgruppen und Nationen in ihrer Ordination in Wien-Währing – seit über 35 Jahren.
     </p>
     <div class="hero-actions">
-      <a href="https://portal.helenini.at?lang=de" id="hero-cta1" class="portal-link btn-primary" target="_blank" rel="noopener noreferrer">
+      <a href="https://portal.frauenarzt-neumann.at?lang=de" id="hero-cta1" class="portal-link btn-primary" target="_blank" rel="noopener noreferrer">
         Termin online anfragen
       </a>
       <a href="#ueber-uns" id="hero-cta2" class="btn-outline">Über die Ordination</a>
@@ -1018,7 +1018,7 @@
           <span id="portal-f4">Verfügbar auf Deutsch, Ungarisch und Englisch</span>
         </div>
       </div>
-      <a href="https://portal.helenini.at?lang=de" id="portal-cta" class="portal-link btn-primary" target="_blank" rel="noopener noreferrer">
+      <a href="https://portal.frauenarzt-neumann.at?lang=de" id="portal-cta" class="portal-link btn-primary" target="_blank" rel="noopener noreferrer">
         Portal öffnen →
       </a>
     </div>
@@ -1034,7 +1034,7 @@
         <div class="portal-iframe-overlay">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9b4f7a" stroke-width="1.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           <p id="portal-badge">Sicher, diskret &amp; immer verfügbar</p>
-          <a href="https://portal.helenini.at?lang=de" class="btn-primary portal-link" target="_blank" rel="noopener noreferrer" style="font-size:0.75rem;padding:0.7rem 1.4rem">
+          <a href="https://portal.frauenarzt-neumann.at?lang=de" class="btn-primary portal-link" target="_blank" rel="noopener noreferrer" style="font-size:0.75rem;padding:0.7rem 1.4rem">
             Zum Portal
           </a>
         </div>
@@ -1083,7 +1083,7 @@
         </p>
       </div>
 
-      <a id="kontakt-cta" href="https://portal.helenini.at?lang=de" class="portal-link btn-primary" target="_blank" rel="noopener noreferrer">
+      <a id="kontakt-cta" href="https://portal.frauenarzt-neumann.at?lang=de" class="portal-link btn-primary" target="_blank" rel="noopener noreferrer">
         Online Termin anfragen
       </a>
     </div>
@@ -1424,6 +1424,20 @@
 
   let currentLang = 'de';
 
+  // Portal ist noch nicht mit echten Terminen befüllt - bis der Kalender
+  // importiert ist, sollen alle Portal-Buttons "In Kürze verfügbar" zeigen
+  // statt tatsächlich zum (noch leeren) Portal zu verlinken, sonst drohen
+  // Doppelbuchungen mit dem bisherigen, telefonischen Buchungsweg der
+  // Ordination. Auf false setzen, sobald der echte Kalender importiert und
+  // getestet ist.
+  const PORTAL_COMING_SOON = true;
+  const COMING_SOON_TEXT = { de: 'In Kürze verfügbar', hu: 'Hamarosan elérhető', en: 'Coming soon' };
+  const COMING_SOON_ALERT = {
+    de: 'Das Online-Portal ist in Kürze verfügbar. Für Termine kontaktieren Sie uns bitte vorerst telefonisch.',
+    hu: 'Az online portál hamarosan elérhető lesz. Időpontért kérjük, egyelőre telefonon keressen minket.',
+    en: 'The online portal will be available soon. For appointments, please contact us by phone for now.',
+  };
+
   function setLang(lang) {
     currentLang = lang;
     const t = LANG_DATA[lang];
@@ -1589,7 +1603,19 @@
 
     // Update all portal links to pass current language
     document.querySelectorAll('.portal-link').forEach(a => {
-      a.href = 'https://portal.helenini.at?lang=' + lang;
+      if (PORTAL_COMING_SOON) {
+        a.textContent = COMING_SOON_TEXT[lang] || COMING_SOON_TEXT.de;
+        a.removeAttribute('target');
+        a.href = '#';
+        a.onclick = function(e) {
+          e.preventDefault();
+          alert(COMING_SOON_ALERT[lang] || COMING_SOON_ALERT.de);
+        };
+      } else {
+        a.onclick = null;
+        a.setAttribute('target', '_blank');
+        a.href = 'https://portal.frauenarzt-neumann.at?lang=' + lang;
+      }
     });
   }
 
@@ -2200,7 +2226,7 @@
 
 <!-- Sticky mobile portal button -->
 <div id="sticky-portal-bar">
-  <a id="sticky-portal-btn" href="https://portal.helenini.at?lang=de" class="portal-link" target="_blank" rel="noopener noreferrer">
+  <a id="sticky-portal-btn" href="https://portal.frauenarzt-neumann.at?lang=de" class="portal-link" target="_blank" rel="noopener noreferrer">
     Jetzt Termin buchen →
   </a>
 </div>
