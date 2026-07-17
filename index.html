@@ -1612,7 +1612,9 @@
         a.href = '#';
         a.onclick = function(e) {
           e.preventDefault();
-          alert(COMING_SOON_ALERT[lang] || COMING_SOON_ALERT.de);
+          document.getElementById('modal-coming-soon-title').textContent = COMING_SOON_TEXT[lang] || COMING_SOON_TEXT.de;
+          document.getElementById('modal-coming-soon-text').textContent = COMING_SOON_ALERT[lang] || COMING_SOON_ALERT.de;
+          openModal('coming-soon');
         };
       } else {
         a.onclick = null;
@@ -2096,6 +2098,19 @@
     }
   }
 </script>
+
+<!-- COMING SOON MODAL -->
+<div class="modal-backdrop" id="modal-coming-soon" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box" style="max-width:420px">
+    <div class="modal-header">
+      <h2 id="modal-coming-soon-title">In Kürze verfügbar</h2>
+      <button class="modal-close" onclick="closeModal()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <p id="modal-coming-soon-text" style="color:#5a4e4a">Das Online-Portal ist in Kürze verfügbar. Für Termine kontaktieren Sie uns bitte vorerst telefonisch.</p>
+    </div>
+  </div>
+</div>
 
 <!-- PARTNER MODAL -->
 <div class="modal-backdrop" id="modal-partner" onclick="if(event.target===this)closeModal()">
