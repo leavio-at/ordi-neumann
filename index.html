@@ -1946,6 +1946,27 @@
         }
       }
 
+      // JSON-LD-Öffnungszeiten (für Google-Suchergebnisse/Rich-Snippets)
+      // ebenfalls live aktualisieren, statt sie fix im Quelltext stehen zu
+      // lassen - sonst zeigt Google weiterhin veraltete Zeiten, selbst wenn
+      // im Dashboard geändert wird.
+      try {
+        var _ldScript = document.querySelector('script[type="application/ld+json"]');
+        if (_ldScript && michael && etelka) {
+          var _ld = JSON.parse(_ldScript.textContent);
+          var _allHours = (michael.hours || []).concat(etelka.hours || []);
+          if (_allHours.length) {
+            _ld.openingHoursSpecification = _allHours
+              .slice()
+              .sort(function(a,b){ return (a.weekday||0)-(b.weekday||0); })
+              .map(function(h) {
+                return { '@type': 'OpeningHoursSpecification', dayOfWeek: DOW_EN[h.weekday], opens: h.time_from, closes: h.time_to };
+              });
+            _ldScript.textContent = JSON.stringify(_ld);
+          }
+        }
+      } catch(e) { console.log('JSON-LD Öffnungszeiten-Update fehlgeschlagen:', e); }
+
       setLang(currentLang);
     } catch(e) {
       // Silently fall back to hardcoded defaults already in LANG_DATA
