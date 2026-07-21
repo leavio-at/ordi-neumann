@@ -1416,13 +1416,10 @@
 
   let currentLang = 'de';
 
-  // Portal ist noch nicht mit echten Terminen befüllt - bis der Kalender
-  // importiert ist, sollen alle Portal-Buttons "In Kürze verfügbar" zeigen
-  // statt tatsächlich zum (noch leeren) Portal zu verlinken, sonst drohen
-  // Doppelbuchungen mit dem bisherigen, telefonischen Buchungsweg der
-  // Ordination. Auf false setzen, sobald der echte Kalender importiert und
-  // getestet ist.
-  const PORTAL_COMING_SOON = true;
+  // Portal ist ab 2026-07-22 live (echter Kalender importiert, Sicherheits-
+  // audit abgeschlossen) - Portal-Buttons verlinken jetzt tatsächlich zum
+  // Portal statt "In Kürze verfügbar" zu zeigen.
+  const PORTAL_COMING_SOON = false;
   const COMING_SOON_TEXT = { de: 'In Kürze verfügbar', hu: 'Hamarosan elérhető', en: 'Coming soon' };
   const COMING_SOON_ALERT = {
     de: 'Das Online-Portal ist in Kürze verfügbar. Für Termine kontaktieren Sie uns bitte vorerst telefonisch.',
