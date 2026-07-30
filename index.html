@@ -1628,6 +1628,7 @@
   // Load dynamic data: opening hours first (populates _doctorIdMap), then photos
   loadOpeningHours().then(function() { loadDoctorPhotos(); });
   loadPracticeSettings();
+  loadAbsenceNotice();
 
   // ── Privacy-friendly Analytics (keine Cookies, kein Tracking-Banner nötig) ──
   function trackEvent(type, target) {
@@ -2108,6 +2109,91 @@
     }
   }
 
+  // Hinweis-Modal bei Praxisschließung (Urlaub etc.) - im Dashboard unter
+  // Termine → Änderungen kann eine Abwesenheit/Überschreibung/Sperre mit
+  // "Auf Webseite anzeigen" markiert werden. Ohne eine solche Markierung
+  // liefert der Endpoint notice:null und hier passiert einfach nichts.
+  var ABSENCE_TITLES = { de: 'Wichtiger Hinweis', hu: 'Fontos tudnivaló', en: 'Important notice' };
+  var ABSENCE_CTAS   = { de: 'Zum Patientenportal →', hu: 'A betegportálra →', en: 'Go to patient portal →' };
+  var ABSENCE_MONTHS_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var ABSENCE_JOIN = { de: ' und ', hu: ' és ', en: ' and ' };
+  function absenceFmtDate(iso, lang) {
+    var p = iso.split('-'); // YYYY-MM-DD
+    if (lang === 'en') return ABSENCE_MONTHS_EN[parseInt(p[1],10)-1] + ' ' + parseInt(p[2],10) + ', ' + p[0];
+    return parseInt(p[2],10) + '.' + parseInt(p[1],10) + '.' + p[0];
+  }
+  function absenceJoinNames(names, lang) {
+    if (names.length <= 1) return names[0] || '';
+    return names.slice(0, -1).join(', ') + (ABSENCE_JOIN[lang] || ABSENCE_JOIN.de) + names[names.length - 1];
+  }
+  // n: { date_from, date_to, whole_practice, doctors: [Namen] } - siehe
+  // GET /public/active-absence-notice. Bei whole_practice=true sind laut
+  // Backend ALLE aktiven Ärzt:innen für denselben Zeitraum freigegeben
+  // ("Ordination geschlossen"), sonst werden die betroffenen Personen
+  // namentlich genannt. sameDay unterscheidet "am X" von "von X bis Y".
+  function absenceText(lang, n, fromLbl, toLbl) {
+    var sameDay = n.date_from === n.date_to;
+    // Deutsch: Nebensatz braucht das Verb am Ende ("... dass X ... ist."),
+    // nicht davor - daher predicate (ohne Verb) und verb getrennt gehalten.
+    var whoDe = n.whole_practice ? 'unsere Ordination' : absenceJoinNames(n.doctors, lang);
+    var verbDe = n.whole_practice || n.doctors.length > 1 ? 'sind' : 'ist';
+    var predicateDe = n.whole_practice ? 'geschlossen' : 'nicht in der Ordination';
+    if (lang === 'hu') {
+      var whoHu = n.whole_practice ? 'rendelőnk' : absenceJoinNames(n.doctors, lang);
+      var stateHu = n.whole_practice ? 'zárva tart' : 'nem lesz elérhető a rendelőben';
+      var whenHu = sameDay ? fromLbl + '-án' : fromLbl + ' és ' + toLbl + ' között';
+      return 'Kérjük, vegye figyelembe, hogy ' + whoHu + ' ' + whenHu + ' ' + stateHu + '. Ez idő alatt bármikor foglalhat időpontot online betegportálunkon keresztül.';
+    }
+    if (lang === 'en') {
+      var whoEn = n.whole_practice ? 'our practice' : absenceJoinNames(n.doctors, lang);
+      var verbEn = n.whole_practice || n.doctors.length > 1 ? 'are' : 'is';
+      var stateEn = n.whole_practice ? 'closed' : 'not available at the practice';
+      var whenEn = sameDay ? 'on ' + fromLbl : 'from ' + fromLbl + ' to ' + toLbl;
+      return 'Please note that ' + whoEn + ' ' + whenEn + ' ' + verbEn + ' ' + stateEn + '. In the meantime, you can book an appointment anytime via our patient portal.';
+    }
+    var whenDe = sameDay ? 'am ' + fromLbl : 'von ' + fromLbl + ' bis ' + toLbl;
+    return 'Bitte beachten Sie, dass ' + whoDe + ' ' + whenDe + ' ' + predicateDe + ' ' + verbDe + '. In der Zwischenzeit können Sie jederzeit einen Termin über unser Patientenportal buchen.';
+  }
+  // Das Modal feuert automatisch beim Seitenload, BEVOR der Besuch die
+  // Sprache manuell umschalten könnte (setLang('de') läuft immer zuerst,
+  // siehe Init unten) - currentLang wäre an dieser Stelle also praktisch
+  // immer 'de', selbst für ungarische/englische Besucher:innen. Nur für
+  // dieses Modal daher stattdessen die Browsersprache auswerten; der Rest
+  // der Seite bleibt unverändert beim manuellen Umschalter.
+  function _absenceDetectLang() {
+    var langs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || 'de'];
+    for (var i = 0; i < langs.length; i++) {
+      var l = (langs[i] || '').toLowerCase();
+      if (l.indexOf('hu') === 0) return 'hu';
+      if (l.indexOf('en') === 0) return 'en';
+      if (l.indexOf('de') === 0) return 'de';
+    }
+    return 'de';
+  }
+  async function loadAbsenceNotice() {
+    try {
+      var ctrl = new AbortController();
+      setTimeout(function(){ ctrl.abort(); }, 30000);
+      var resp = await fetch(BACKEND_URL + '/public/active-absence-notice', { signal: ctrl.signal });
+      if (!resp.ok) return;
+      var data = await resp.json();
+      var n = data.notice;
+      if (!n || !n.date_from || !n.date_to) return;
+      if (!n.whole_practice && (!n.doctors || !n.doctors.length)) return;
+      var lang = _absenceDetectLang();
+      var fromLbl = absenceFmtDate(n.date_from, lang), toLbl = absenceFmtDate(n.date_to, lang);
+      var titleEl = document.getElementById('modal-absence-title');
+      var textEl  = document.getElementById('modal-absence-text');
+      var ctaEl   = document.getElementById('modal-absence-cta');
+      if (titleEl) titleEl.textContent = ABSENCE_TITLES[lang] || ABSENCE_TITLES.de;
+      if (textEl)  textEl.textContent  = absenceText(lang, n, fromLbl, toLbl);
+      if (ctaEl)   { ctaEl.textContent = ABSENCE_CTAS[lang] || ABSENCE_CTAS.de; ctaEl.href = 'https://portal.frauenarzt-neumann.at?lang=' + lang; }
+      openModal('absence-notice');
+    } catch(e) {
+      console.log('Absence notice API unavailable');
+    }
+  }
+
   // Render beim Seitenload im Hintergrund aufwecken
   fetch(BACKEND_URL + '/', { method: 'GET', mode: 'cors' }).catch(function(){});
 
@@ -2140,6 +2226,22 @@
     </div>
     <div class="modal-body">
       <p id="modal-coming-soon-text" style="color:#5a4e4a">Das Online-Portal ist in Kürze verfügbar. Für Termine kontaktieren Sie uns bitte vorerst telefonisch.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ABWESENHEITS-HINWEIS MODAL (nur sichtbar, wenn im Dashboard eine
+     Abwesenheit mit "Auf Webseite anzeigen" markiert ist, siehe
+     loadAbsenceNotice()) -->
+<div class="modal-backdrop" id="modal-absence-notice" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box" style="max-width:440px">
+    <div class="modal-header">
+      <h2 id="modal-absence-title">Wichtiger Hinweis</h2>
+      <button class="modal-close" onclick="closeModal()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <p id="modal-absence-text" style="color:#5a4e4a"></p>
+      <a id="modal-absence-cta" href="https://portal.frauenarzt-neumann.at?lang=de" class="btn-primary" style="margin-top:0.5rem;color:var(--white)">Zum Patientenportal</a>
     </div>
   </div>
 </div>
