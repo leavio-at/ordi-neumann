@@ -709,6 +709,12 @@
   .modal-body a { color: var(--rose); }
   .modal-body ul { padding-left: 1.2rem; }
   .modal-body ul li { margin-bottom: 0.4rem; }
+  /* Abwesenheits-Hinweis-Button: Pfeil darf nicht in eine eigene Zeile
+     rutschen - auf schmalen Handys reicht der Platz sonst knapp nicht. */
+  #modal-absence-cta { white-space: nowrap; }
+  @media (max-width: 480px) {
+    #modal-absence-cta { font-size: 0.76rem; padding: 0.8rem 1.3rem; }
+  }
 
   /* REVIEWS */
   .reviews-section { padding: 5rem 8vw; background: var(--cream); }
@@ -2136,7 +2142,11 @@
     // Deutsch: Nebensatz braucht das Verb am Ende ("... dass X ... ist."),
     // nicht davor - daher predicate (ohne Verb) und verb getrennt gehalten.
     var whoDe = n.whole_practice ? 'unsere Ordination' : absenceJoinNames(n.doctors, lang);
-    var verbDe = n.whole_practice || n.doctors.length > 1 ? 'sind' : 'ist';
+    // "unsere Ordination" ist immer Singular ("ist") - Plural ("sind") nur,
+    // wenn mehrere NAMENTLICH genannte Ärzt:innen das Subjekt sind (nicht
+    // bei whole_practice, dort war der Bug: whole_practice ODER >1 machte
+    // faelschlich auch "unsere Ordination ... sind").
+    var verbDe = (!n.whole_practice && n.doctors.length > 1) ? 'sind' : 'ist';
     var predicateDe = n.whole_practice ? 'geschlossen' : 'nicht in der Ordination';
     if (lang === 'hu') {
       var whoHu = n.whole_practice ? 'rendelőnk' : absenceJoinNames(n.doctors, lang);
@@ -2146,7 +2156,7 @@
     }
     if (lang === 'en') {
       var whoEn = n.whole_practice ? 'our practice' : absenceJoinNames(n.doctors, lang);
-      var verbEn = n.whole_practice || n.doctors.length > 1 ? 'are' : 'is';
+      var verbEn = (!n.whole_practice && n.doctors.length > 1) ? 'are' : 'is';
       var stateEn = n.whole_practice ? 'closed' : 'not available at the practice';
       var whenEn = sameDay ? 'on ' + fromLbl : 'from ' + fromLbl + ' to ' + toLbl;
       return 'Please note that ' + whoEn + ' ' + whenEn + ' ' + verbEn + ' ' + stateEn + '. In the meantime, you can book an appointment anytime via our patient portal.';
