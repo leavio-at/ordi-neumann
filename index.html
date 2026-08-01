@@ -914,7 +914,7 @@
 
     <div class="ueber-grid">
       <!-- Michael -->
-      <div class="arzt-card">
+      <div class="arzt-card" id="arzt-card-m">
         <div class="arzt-photo-wrap">
           <img id="arzt-photo-m" class="arzt-photo-img" src="dr-michael.jpg" alt="OA Dr. Michael Neumann" loading="lazy">
           <div class="arzt-photo-bar"></div>
@@ -939,7 +939,7 @@
       </div>
 
       <!-- Etelka -->
-      <div class="arzt-card">
+      <div class="arzt-card" id="arzt-card-e">
         <div class="arzt-photo-wrap">
           <img id="arzt-photo-e" class="arzt-photo-img" src="dr-etelka.jpg" alt="OÄ Dr. Etelka Neumann" loading="lazy">
           <div class="arzt-photo-bar"></div>
@@ -967,7 +967,7 @@
     </div>
 
     <!-- Elena -->
-    <div class="elena-row">
+    <div class="elena-row" id="elena-row">
       <div class="elena-photo-wrap">
         <img id="elena-photo" src="elena.jpg" alt="Elena, Ordinationsassistenz" loading="lazy">
         <div class="elena-bar"></div>
@@ -1635,6 +1635,7 @@
   loadOpeningHours().then(function() { loadDoctorPhotos(); });
   loadPracticeSettings();
   loadAbsenceNotice();
+  loadStaffBios();
 
   // ── Privacy-friendly Analytics (keine Cookies, kein Tracking-Banner nötig) ──
   function trackEvent(type, target) {
@@ -2098,21 +2099,11 @@
         }
       } catch(e) { console.log('website_reviews Update fehlgeschlagen:', e); }
 
-      try {
-        var bios = JSON.parse(s.website_doctor_bios || '{}');
-        ['de','hu','en'].forEach(function(lang) {
-          var t = LANG_DATA[lang];
-          if (bios.michael) {
-            if (bios.michael.bio && bios.michael.bio[lang]) t.team.m_bio = bios.michael.bio[lang];
-            if (bios.michael.schwerpunkte && bios.michael.schwerpunkte[lang]) t.schwerpunkte_m = bios.michael.schwerpunkte[lang];
-          }
-          if (bios.etelka) {
-            if (bios.etelka.bio && bios.etelka.bio[lang]) t.team.e_bio = bios.etelka.bio[lang];
-            if (bios.etelka.schwerpunkte && bios.etelka.schwerpunkte[lang]) t.schwerpunkte_e = bios.etelka.schwerpunkte[lang];
-          }
-          if (bios.elena && bios.elena.bio && bios.elena.bio[lang]) t.team.elena_bio = bios.elena.bio[lang];
-        });
-      } catch(e) { console.log('website_doctor_bios Update fehlgeschlagen:', e); }
+      // Bio/Schwerpunkte kommen jetzt direkt vom Benutzerkonto statt vom
+      // (mittlerweile ungenutzten) website_doctor_bios-Setting - eigener
+      // Request, siehe loadStaffBios() weiter unten (dort auch die Logik,
+      // die eine ganze Team-Karte ausblendet, wenn der zugehörige Account
+      // deaktiviert/gelöscht wurde).
 
       // addr_body hat die feste Form "Adresszeile<br><br>Wegbeschreibung" -
       // beide Teile jetzt dynamisch: die Adresszeile aus den ohnehin schon
@@ -2178,11 +2169,16 @@
       var data = await resp.json();
       var photos = data.photos || [];
 
-      // username → img element id mapping (covers doctors + assistant)
+      // username → img element id mapping (covers doctors + assistant).
+      // Fix 2026-08-01: die echten Benutzernamen sind 'michael'/'etelka'
+      // (nicht 'dr-neumann-m'/'dr-neumann-e') - dadurch griffen die Fotos
+      // von Dr. Michael und Dr. Etelka hier nie wirklich, es blieb
+      // unbemerkt beim statischen dr-michael.jpg/dr-etelka.jpg als
+      // Fallback (Elena traf zufällig zu, ihr Foto lud schon korrekt).
       var USERNAME_MAP = {
-        'dr-neumann-m': 'arzt-photo-m',
-        'dr-neumann-e': 'arzt-photo-e',
-        'elena':        'elena-photo'
+        'michael': 'arzt-photo-m',
+        'etelka':  'arzt-photo-e',
+        'elena':   'elena-photo'
       };
 
       // Use first photo per username (most recently uploaded with for_website=1)
@@ -2227,6 +2223,53 @@
       }
     } catch(e) {
       console.log('Doctor photos API unavailable, using static files');
+    }
+  }
+
+  // Bio + Schwerpunkte-Tags direkt vom Benutzerkonto (siehe GET /public/
+  // staff-bios im Backend) statt von festen, an keinen echten Account
+  // gekoppelten Schlüsseln. Gleiche username→Slot-Zuordnung wie bei den
+  // Fotos oben (loadDoctorPhotos/USERNAME_MAP). Fehlt ein Account (weil
+  // deaktiviert oder endgültig gelöscht), wird die GANZE Team-Karte
+  // ausgeblendet (Foto, Name, Bio, Schwerpunkte) statt veralteten Text
+  // stehen zu lassen.
+  var STAFF_SLOTS = {
+    'michael': { card: 'arzt-card-m', bioKey: 'm_bio', tagsKey: 'schwerpunkte_m' },
+    'etelka':  { card: 'arzt-card-e', bioKey: 'e_bio', tagsKey: 'schwerpunkte_e' },
+    'elena':   { card: 'elena-row',   bioKey: 'elena_bio', tagsKey: null },
+  };
+  async function loadStaffBios() {
+    try {
+      var ctrl = new AbortController();
+      setTimeout(function(){ ctrl.abort(); }, 30000);
+      var resp = await fetch(BACKEND_URL + '/public/staff-bios', { signal: ctrl.signal });
+      if (!resp.ok) return;
+      var data = await resp.json();
+      var staffByUsername = {};
+      (data.staff || []).forEach(function(s) { staffByUsername[s.username] = s; });
+
+      Object.keys(STAFF_SLOTS).forEach(function(username) {
+        var slot = STAFF_SLOTS[username];
+        var cardEl = document.getElementById(slot.card);
+        var entry = staffByUsername[username];
+        if (!entry) {
+          // Kein aktiver Account (mehr) mit diesem Benutzernamen - Karte
+          // komplett ausblenden statt veraltete Daten zu zeigen.
+          if (cardEl) cardEl.style.display = 'none';
+          return;
+        }
+        if (cardEl) cardEl.style.display = '';
+        ['de','hu','en'].forEach(function(lang) {
+          var t = LANG_DATA[lang];
+          if (entry.bio && entry.bio[lang]) t.team[slot.bioKey] = entry.bio[lang];
+          if (slot.tagsKey && entry.schwerpunkte && entry.schwerpunkte[lang] && entry.schwerpunkte[lang].length) {
+            t[slot.tagsKey] = entry.schwerpunkte[lang];
+          }
+        });
+      });
+      setLang(currentLang);
+    } catch(e) {
+      console.log('Staff-Bios API nicht erreichbar:', e);
     }
   }
 
