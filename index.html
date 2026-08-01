@@ -786,15 +786,15 @@
     </div>
     <div class="hero-stats">
       <div>
-        <div class="stat-number">8.000+</div>
+        <div class="stat-number" id="stat1-value">8.000+</div>
         <div class="stat-label" id="stat1-label">Geburten begleitet</div>
       </div>
       <div>
-        <div class="stat-number">5.000+</div>
+        <div class="stat-number" id="stat2-value">5.000+</div>
         <div class="stat-label" id="stat2-label">Operationen</div>
       </div>
       <div>
-        <div class="stat-number">35+</div>
+        <div class="stat-number" id="stat3-value">35+</div>
         <div class="stat-label" id="stat3-label">Jahre Erfahrung</div>
       </div>
     </div>
@@ -946,7 +946,7 @@
         </div>
         <span class="label arzt-role" id="arzt-e-role">Frauenärztin</span>
         <h3 class="arzt-name" id="arzt-name-e">OÄ Dr. Etelka Neumann</h3>
-        <p class="arzt-bio" id="arzt-e-bio" id="arzt-m-bio">
+        <p class="arzt-bio" id="arzt-e-bio">
           OÄ Dr. Etelka Neumann weist eine über 30-jährige Erfahrung in der Geburtshilfe und Frauenheilkunde auf. Ihre Patientinnen schätzen ihre professionelle und sanfte Art, ihre hohe Empathie und ihre profunde Erfahrung.
           <br><br>
           Die berufliche Laufbahn begann als diplomierte Krankheitsschwester und Hebamme – über 10 Jahre in der Budapester Semmelweis-Klinik und im Wilhelminenspital Wien. Seit 2008 als Fachärztin tätig, aktuell Belegärztin im Rudolfinerhaus und Privatklinik Döbling. Die Ordination wird auch auf Ungarisch angeboten.
@@ -1108,7 +1108,7 @@
       <div class="review-card">
         <div class="review-stars">★★★★★</div>
         <div class="review-text" id="review-text-1">Fr. Dr. Neumann und Hr. Dr. Neumann sind mit Abstand die zwei nettesten Ärzte, die ich je erlebt habe. Als Menschen sind sie einfach zwei Engel. In ihrer Ordination fühlt man sich wie in einer Wohlfühloase. Ich wurde sehr aufmerksam und hingebungsvoll betreut.</div>
-        <div class="review-footer"><span class="review-name">Lejla B.</span><span class="review-date" id="review-date-1">Verifizierte Patientin · <a href="https://www.docfinder.at" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">DocFinder</a></span></div>
+        <div class="review-footer"><span class="review-name" id="review-name-1">Lejla B.</span><span class="review-date" id="review-date-1">Verifizierte Patientin · <a href="https://www.docfinder.at" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:2px">DocFinder</a></span></div>
       </div>
       <div class="review-card">
         <div class="review-stars">★★★★★</div>
@@ -2046,6 +2046,93 @@
           _ldScript2.textContent = JSON.stringify(_ld2);
         }
       } catch(e) { console.log('JSON-LD Praxisdaten-Update fehlgeschlagen:', e); }
+
+      // Website-Inhalte (Leistungen, Kennzahlen, Bewertungen, Ärzt:innen-
+      // Bios, Anfahrt) - vorher direkt im HTML/LANG_DATA hardcodiert, jetzt
+      // im Dashboard unter "Einstellungen → Webseite" pflegbar. Gleiches
+      // Prinzip wie bei der Adresse oben: LANG_DATA für alle drei Sprachen
+      // aktualisieren (nicht nur die aktuell sichtbare), damit ein späterer
+      // Sprachwechsel konsistent bleibt, dann einmal setLang(currentLang)
+      // am Ende, um alles neu zu rendern. Jedes Feld einzeln try/catch-
+      // abgesichert und nur bei vorhandenen Daten überschrieben - fehlt ein
+      // Feld oder ist die API nicht erreichbar, bleibt der bisherige
+      // hardcodierte Text als Fallback stehen (kein leerer Screen).
+      try {
+        var services = JSON.parse(s.website_services || '[]');
+        if (services.length) {
+          ['de','hu','en'].forEach(function(lang) {
+            LANG_DATA[lang].leistungen.items = services.map(function(it) {
+              return {
+                name: (it.name && it.name[lang]) || (it.name && it.name.de) || '',
+                desc: (it.desc && it.desc[lang]) || (it.desc && it.desc.de) || '',
+              };
+            });
+          });
+        }
+      } catch(e) { console.log('website_services Update fehlgeschlagen:', e); }
+
+      try {
+        var stats = JSON.parse(s.website_hero_stats || '[]');
+        if (stats.length === 3) {
+          ['de','hu','en'].forEach(function(lang) {
+            var h = LANG_DATA[lang].hero;
+            h.stat1l = (stats[0].label && stats[0].label[lang]) || h.stat1l;
+            h.stat2l = (stats[1].label && stats[1].label[lang]) || h.stat2l;
+            h.stat3l = (stats[2].label && stats[2].label[lang]) || h.stat3l;
+          });
+          var v1 = document.getElementById('stat1-value');
+          var v2 = document.getElementById('stat2-value');
+          var v3 = document.getElementById('stat3-value');
+          if (v1 && stats[0].value) v1.textContent = stats[0].value;
+          if (v2 && stats[1].value) v2.textContent = stats[1].value;
+          if (v3 && stats[2].value) v3.textContent = stats[2].value;
+        }
+      } catch(e) { console.log('website_hero_stats Update fehlgeschlagen:', e); }
+
+      try {
+        var reviews = JSON.parse(s.website_reviews || '[]');
+        if (reviews.length === 3) {
+          ['de','hu','en'].forEach(function(lang) {
+            var rv = LANG_DATA[lang].reviews;
+            rv.r1 = (reviews[0].text && reviews[0].text[lang]) || rv.r1;
+            rv.r2 = (reviews[1].text && reviews[1].text[lang]) || rv.r2;
+            rv.r3 = (reviews[2].text && reviews[2].text[lang]) || rv.r3;
+          });
+          var rn1 = document.getElementById('review-name-1');
+          if (rn1 && reviews[0].name) rn1.textContent = reviews[0].name;
+        }
+      } catch(e) { console.log('website_reviews Update fehlgeschlagen:', e); }
+
+      try {
+        var bios = JSON.parse(s.website_doctor_bios || '{}');
+        ['de','hu','en'].forEach(function(lang) {
+          var t = LANG_DATA[lang];
+          if (bios.michael) {
+            if (bios.michael.bio && bios.michael.bio[lang]) t.team.m_bio = bios.michael.bio[lang];
+            if (bios.michael.schwerpunkte && bios.michael.schwerpunkte[lang]) t.schwerpunkte_m = bios.michael.schwerpunkte[lang];
+          }
+          if (bios.etelka) {
+            if (bios.etelka.bio && bios.etelka.bio[lang]) t.team.e_bio = bios.etelka.bio[lang];
+            if (bios.etelka.schwerpunkte && bios.etelka.schwerpunkte[lang]) t.schwerpunkte_e = bios.etelka.schwerpunkte[lang];
+          }
+        });
+      } catch(e) { console.log('website_doctor_bios Update fehlgeschlagen:', e); }
+
+      try {
+        var directions = JSON.parse(s.website_directions || '{}');
+        ['de','hu','en'].forEach(function(lang) {
+          if (!directions[lang]) return;
+          // addr_body hat die feste Form "Adresse+Bezirk<br><br>Wegbeschreibung" -
+          // nur den Wegbeschreibungs-Teil (nach dem doppelten <br><br>) ersetzen,
+          // die Adresszeile selbst bleibt unverändert (kommt aus practice_address,
+          // wird oben separat gepflegt).
+          var current = LANG_DATA[lang].kontakt.addr_body || '';
+          var header = current.split('<br><br>')[0];
+          LANG_DATA[lang].kontakt.addr_body = header + '<br><br>' + directions[lang];
+        });
+      } catch(e) { console.log('website_directions Update fehlgeschlagen:', e); }
+
+      setLang(currentLang);
     } catch(e) {
       console.log('Practice settings API unavailable, using defaults');
     }
