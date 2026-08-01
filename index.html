@@ -1690,12 +1690,6 @@
   }
   document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
 
-  // Static partner data as fallback
-  var STATIC_PARTNERS = [
-    { name: 'OÄ Dr. Zorica Petrovic', specialty: 'Urologie', address: 'Schopenhauerstraße 64/2-4, 1180 Wien', website: 'www.urologie-petrovic.at', notes: null, phone: null },
-    { name: 'OA Dr. Georg Freude', specialty: 'Kinderwunsch / Fortpflanzungsmedizin', address: 'Niederhofstrasse 30/2, 1120 Wien', website: 'www.sterilitaet.at', notes: 'Kinderwunschzentrum GYNANDRON – Institut für Fortpflanzungsmedizin und Endokrinologie', phone: null },
-    { name: 'Dr. Hans-Peter Holzapfel', specialty: 'Orthopädie', address: 'Sieveringerstrasse 36/2, 1190 Wien', website: 'www.medfocus.at', notes: 'Facharzt für Orthopädie und orthopädische Chirurgie', phone: null },
-  ];
 
   var SPECIALTY_MAP = {
     en: {
@@ -1757,11 +1751,12 @@
     var container = document.getElementById('partner-list-modal');
     if (!container) return;
     _lastPartners = partners;
+    var lang = currentLang || 'de';
     if (!partners || partners.length === 0) {
-      container.innerHTML = '<p style="color:#9a8e8a">Keine Partner eingetragen.</p>';
+      var emptyMsg = lang === 'en' ? 'No partners listed yet.' : lang === 'hu' ? 'Jelenleg nincsenek partnerek megadva.' : 'Keine Partner eingetragen.';
+      container.innerHTML = '<p style="color:#9a8e8a">' + emptyMsg + '</p>';
       return;
     }
-    var lang = currentLang || 'de';
     container.innerHTML = partners.map(function(p) {
       p = localizePartner(p, lang);
       return '<div style="background:#faf7f4;border:0.5px solid #e8ddd8;border-radius:8px;padding:1.2rem 1.4rem;margin-bottom:1rem">' +
@@ -2115,22 +2110,55 @@
             if (bios.etelka.bio && bios.etelka.bio[lang]) t.team.e_bio = bios.etelka.bio[lang];
             if (bios.etelka.schwerpunkte && bios.etelka.schwerpunkte[lang]) t.schwerpunkte_e = bios.etelka.schwerpunkte[lang];
           }
+          if (bios.elena && bios.elena.bio && bios.elena.bio[lang]) t.team.elena_bio = bios.elena.bio[lang];
         });
       } catch(e) { console.log('website_doctor_bios Update fehlgeschlagen:', e); }
 
+      // addr_body hat die feste Form "Adresszeile<br><br>Wegbeschreibung" -
+      // beide Teile jetzt dynamisch: die Adresszeile aus den ohnehin schon
+      // öffentlichen practice_street/-house_number/-zip/-city-Feldern (statt
+      // der bisher fix "Wien, 18. Bezirk" einprogrammierten Zeile - der
+      // Bezirk selbst lässt sich aus der PLZ nicht allgemeingültig ableiten,
+      // fällt hier bewusst weg statt falsch geraten zu werden), die
+      // Wegbeschreibung aus website_directions. Ohne beide Bausteine bleibt
+      // der bisherige, komplett hardcodierte Text stehen.
       try {
-        var directions = JSON.parse(s.website_directions || '{}');
+        var directions = {};
+        try { directions = JSON.parse(s.website_directions || '{}'); } catch(e2) {}
+        var hasAddr = s.practice_street && s.practice_zip && s.practice_city;
         ['de','hu','en'].forEach(function(lang) {
-          if (!directions[lang]) return;
-          // addr_body hat die feste Form "Adresse+Bezirk<br><br>Wegbeschreibung" -
-          // nur den Wegbeschreibungs-Teil (nach dem doppelten <br><br>) ersetzen,
-          // die Adresszeile selbst bleibt unverändert (kommt aus practice_address,
-          // wird oben separat gepflegt).
           var current = LANG_DATA[lang].kontakt.addr_body || '';
-          var header = current.split('<br><br>')[0];
-          LANG_DATA[lang].kontakt.addr_body = header + '<br><br>' + directions[lang];
+          var parts = current.split('<br><br>');
+          var addrHeader = parts[0];
+          var directionsPart = parts.slice(1).join('<br><br>');
+          if (hasAddr) {
+            var cityName = lang === 'en' ? 'Vienna' : lang === 'hu' ? 'Bécs' : s.practice_city;
+            var houseNr = s.practice_house_number ? ' ' + s.practice_house_number : '';
+            addrHeader = s.practice_street + houseNr + '<br>' + s.practice_zip + ' ' + cityName;
+          }
+          if (directions[lang]) directionsPart = directions[lang];
+          LANG_DATA[lang].kontakt.addr_body = addrHeader + '<br><br>' + directionsPart;
         });
-      } catch(e) { console.log('website_directions Update fehlgeschlagen:', e); }
+      } catch(e) { console.log('Anfahrt-Text Update fehlgeschlagen:', e); }
+
+      // Bewertungsportal-Link (DocFinder) - wird an zwei Stellen verwendet:
+      // Quellenangabe unter den Bewertungen + JSON-LD "sameAs" (SEO). Der
+      // Verifizierungs-Link je einzelner Bewertung (t.reviews.verified,
+      // siehe LANG_DATA) bleibt unangetastet - der zeigt bewusst auf die
+      // allgemeine docfinder.at-Startseite, nicht auf dieses Profil.
+      try {
+        var docfinderUrl = s.website_docfinder_url || '';
+        if (docfinderUrl) {
+          var reviewsSourceLink = document.getElementById('reviews-source');
+          if (reviewsSourceLink) reviewsSourceLink.href = docfinderUrl;
+          var _ldScript3 = document.querySelector('script[type="application/ld+json"]');
+          if (_ldScript3) {
+            var _ld3 = JSON.parse(_ldScript3.textContent);
+            _ld3.sameAs = [docfinderUrl];
+            _ldScript3.textContent = JSON.stringify(_ld3);
+          }
+        }
+      } catch(e) { console.log('DocFinder-Link Update fehlgeschlagen:', e); }
 
       setLang(currentLang);
     } catch(e) {
@@ -2297,19 +2325,23 @@
   async function loadPartners() {
     var container = document.getElementById('partner-list-modal');
     if (!container) return;
-    // Zeige sofort statische Daten als Platzhalter
-    renderPartners(STATIC_PARTNERS);
-    // Live-Daten vom Backend nachladen (jedes Mal beim Öffnen)
+    // Kurzer Ladehinweis statt (früher) fix einprogrammierter "Platzhalter"-
+    // Partner: die waren echte, aber möglicherweise längst veraltete
+    // Neumann-spezifische Daten, die bei leerer/nicht erreichbarer API
+    // unbemerkt stehen blieben - lieber ehrlich "wird geladen" bzw. bei
+    // echtem Leerstand "keine Partner eingetragen" (siehe renderPartners).
+    var lang = currentLang || 'de';
+    container.innerHTML = '<p style="color:#9a8e8a">' + (lang === 'en' ? 'Loading…' : lang === 'hu' ? 'Betöltés…' : 'Wird geladen…') + '</p>';
     try {
       var controller = new AbortController();
       setTimeout(function() { controller.abort(); }, 35000);
       var resp = await fetch(BACKEND_URL + '/partners/public', { signal: controller.signal });
       if (!resp.ok) throw new Error('HTTP ' + resp.status);
       var data = await resp.json();
-      var partners = data.data || [];
-      renderPartners(partners.length > 0 ? partners : STATIC_PARTNERS);
+      renderPartners(data.data || []);
     } catch(e) {
-      console.log('Backend nicht erreichbar - statische Partnerdaten werden angezeigt');
+      console.log('Partner-API nicht erreichbar:', e);
+      renderPartners([]);
     }
   }
 </script>
