@@ -1,0 +1,23 @@
+# Render Blueprint - definiert HTTP-Response-Header, die Render sonst nur
+# manuell im Dashboard (Static Site → Settings → Headers) gesetzt werden
+# können. Permissions-Policy und Strict-Transport-Security wurden bereits
+# manuell im Dashboard nachgetragen - diese Datei ist als Absicherung
+# gedacht, falls der Dienst je auf Blueprint-Sync umgestellt oder neu
+# angelegt wird, damit die Header nicht erneut von Hand eingetragen
+# werden müssen.
+#
+# Content-Security-Policy und Referrer-Policy sind NICHT hier aufgeführt -
+# die kommen bereits als <meta http-equiv="..."> direkt im HTML (index.html
+# <head>) und funktionieren dadurch unabhängig vom Hosting.
+services:
+  - name: ordi-neumann
+    type: web
+    runtime: static
+    staticPublishPath: .
+    headers:
+      - path: /*
+        name: Permissions-Policy
+        value: geolocation=(), microphone=(), camera=()
+      - path: /*
+        name: Strict-Transport-Security
+        value: max-age=31536000; includeSubDomains
