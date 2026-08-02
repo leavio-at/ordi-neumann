@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" class="fonts-pending">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -57,14 +57,32 @@
 <link rel="apple-touch-icon" href="__BACKEND_URL__/public/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- display=optional statt swap: verhindert den "erst fett/system, dann
-     dünn/Cormorant"-Sprung bei jedem Laden (FOUT) - zeigt die Fallback-
-     Schrift nur, wenn die Web-Schrift nicht binnen ~100ms bereitsteht,
-     tauscht dann aber NICHT mehr mitten im Rendern aus. Trade-off: bei
-     sehr langsamer erster Verbindung bleibt für diesen einen Seitenaufruf
-     die Fallback-Schrift stehen statt nachträglich zu wechseln - für eine
-     Praxis-Website ist das unauffälliger als der Sprung selbst. -->
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=optional" rel="stylesheet">
+<!-- display=optional hätte auf diesem Gerät riskiert, dass der Browser
+     dauerhaft bei der Fallback-Schrift "hängen bleibt" statt später auf
+     Cormorant Garamond zu wechseln - genau das wurde live beobachtet
+     (Text blieb durchgehend fett/Fallback statt nur kurz beim ersten
+     Laden). Daher wieder swap (schaltet IMMER auf die Web-Schrift um,
+     sobald sie da ist), kombiniert mit einem eigenen Sichtbarkeits-Gate
+     (Klasse "fonts-pending" auf <html>, siehe Script unten + CSS-Regel
+     oben): Texte bleiben unsichtbar, bis die Web-Schrift bestätigt geladen
+     ist - dadurch sieht niemand mehr den Fallback-Zwischenzustand, egal
+     wie lange das Laden dauert. -->
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<script>
+  (function() {
+    function releaseFonts() { document.documentElement.classList.remove('fonts-pending'); }
+    if (document.fonts && document.fonts.load) {
+      Promise.all([
+        document.fonts.load('300 1em "Cormorant Garamond"'),
+        document.fonts.load('400 1em "Cormorant Garamond"'),
+        document.fonts.load('600 1em "Cormorant Garamond"')
+      ]).then(releaseFonts).catch(releaseFonts);
+    } else {
+      releaseFonts();
+    }
+    setTimeout(releaseFonts, 1500);
+  })();
+</script>
 <style>
   /* ── TOKENS ── */
   :root {
@@ -94,6 +112,33 @@
   }
   img { display: block; max-width: 100%; }
   a { color: inherit; text-decoration: none; }
+
+  /* Cormorant Garamond wird explizit in Gewicht 300 (sehr leicht) verwendet -
+     der Fallback "serif" hat aber meist gar kein echtes Light-Gewicht und
+     rendert stattdessen in seinem Standard-/Fettgewicht, was "fett" wirkt.
+     display=optional (siehe Font-Link oben) verhindert zwar den Sprung
+     MITTEN im Rendern, kann aber je nach Netzwerktiming trotzdem beim
+     Fallback-Gewicht "hängen bleiben" statt auf die echte Schrift zu
+     wechseln. Deshalb zusätzlich per Font Loading API (siehe Script unten)
+     abgesichert: alle Cormorant-Garamond-Texte starten unsichtbar und
+     erscheinen erst, sobald die echte Schrift wirklich geladen ist - nie
+     ein sichtbarer "fett→dünn"-Zustand. */
+  .display, .heading, .subheading, .stat-number, .times-doc-name,
+  .leistung-name, .arzt-photo-initials, .team-atmo-caption, .lisa-name,
+  .arzt-name, .portal-iframe-overlay p, .footer-logo, .modal-header h2,
+  .modal-body h3, .review-text {
+    transition: opacity 0.2s ease;
+  }
+  html.fonts-pending .display, html.fonts-pending .heading,
+  html.fonts-pending .subheading, html.fonts-pending .stat-number,
+  html.fonts-pending .times-doc-name, html.fonts-pending .leistung-name,
+  html.fonts-pending .arzt-photo-initials, html.fonts-pending .team-atmo-caption,
+  html.fonts-pending .lisa-name, html.fonts-pending .arzt-name,
+  html.fonts-pending .portal-iframe-overlay p, html.fonts-pending .footer-logo,
+  html.fonts-pending .modal-header h2, html.fonts-pending .modal-body h3,
+  html.fonts-pending .review-text {
+    opacity: 0;
+  }
 
   /* ── TYPE SCALE ── */
   .display {
@@ -747,12 +792,10 @@
      berücksichtigt zusätzlich die Home-Indicator-Aussparung (iPhone ohne
      Home-Button), die die Leiste dort höher macht als die fixen 74px -
      ohne das reichte der Abstand auf solchen Geräten knapp nicht.
-     Rechtsbündig statt zentriert, damit es nicht mit dem darunter
-     ebenfalls zentrierten "Jetzt Termin buchen"-Button optisch konkurriert. */
+     Bleibt zentriert (gleicher Abstand links/rechts) statt rechtsbündig -
+     Rechtsbündig probiert, aber am echten Gerät wirkte zentriert stimmiger. */
   @media (max-width: 900px) {
     .absence-banner {
-      left: auto; right: 14px; transform: none;
-      max-width: calc(100% - 28px);
       bottom: calc(74px + env(safe-area-inset-bottom) + 14px);
       z-index: 151;
     }
