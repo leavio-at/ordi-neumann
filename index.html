@@ -295,15 +295,15 @@
     padding: 2rem;
     border-radius: 4px;
     box-shadow: 0 4px 40px rgba(42,35,32,0.06);
-    /* Die frühere min-height nur auf .times-doc-name (Cormorant Garamond)
-       hat den gemessenen Layout-Shift kaum verringert - Ursache war auch
-       Inter (Standard-Body-Schrift, .times-contact/.times-doc-day/-hours
-       verwenden sie ungesetzt), das nicht mitgegated war. Statt jedes
-       einzelne Element zu jagen: die ganze Karte bekommt eine Mindesthöhe,
-       die JEDE Schriftmetrik-Differenz beim Fallback→Web-Font-Wechsel
-       absorbiert (box-sizing:border-box, siehe globaler Reset - Padding
-       ist hier schon eingerechnet). */
-    min-height: 300px;
+    /* min-height:300px hat den gemessenen Shift nur leicht verringert
+       (0,116 → 0,106) - vermutlicher Haupttäter ist gar nicht (nur) der
+       Schriftwechsel, sondern dass #times-doctors-row im HTML LEER
+       startet und erst per renderDoctorsUI() (nach dem opening-hours-
+       Request) mit den echten Arztdaten befüllt wird - die Karte wächst
+       dabei von "nur Label + leere Zeile" auf die volle Höhe. Puffer
+       daher spürbar großzügiger (box-sizing:border-box, siehe globaler
+       Reset - Padding ist hier schon eingerechnet). */
+    min-height: 360px;
   }
   .times-row {
     display: grid;
