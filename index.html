@@ -71,15 +71,19 @@
 <style>
   /* ── TOKENS ── */
   :root {
-    /* Neutraler Platzhalter-Grauton statt Leavio-Navy: bis
+    /* Warmer Terrakotta-Ton statt Leavio-Navy als Default, bis
        _applyBrandColors() die echte Praxisfarbe setzt (siehe
-       loadPracticeSettings()), soll ein kurz sichtbarer Startzustand nicht
-       wie eine fremde Marke aussehen, sondern einfach "noch ungestylt"
-       wirken - kostet anders als ein Versteck-Mechanismus keine Ladezeit. */
-    --rose:       #8a8078;
-    --rose-deep:  #6b6259;
-    --rose-light: #f0ede9;
-    --rose-mist:  #f7f5f3;
+       loadPracticeSettings()) - gilt nicht nur kurz beim ersten Laden,
+       sondern DAUERHAFT für jede Instanz ohne konfigurierte Markenfarbe
+       (z.B. Demo-/Vorlagen-Seiten wie ordi.leavio.at, oder neue
+       Kund:innen vor dem Onboarding-Schritt "Markenfarbe wählen") - ein
+       reiner Grauton wirkte dort leblos ("wie gestorben"), dieser Ton
+       passt zur ohnehin warmen Cream/Stone-Palette und sieht auch
+       dauerhaft präsentabel aus, ohne wie eine fremde Marke zu wirken. */
+    --rose:       #b5715f;
+    --rose-deep:  #96594a;
+    --rose-light: #f5e8e3;
+    --rose-mist:  #faf2ef;
     --stone:      #2a2320;
     --stone-mid:  #5a4e4a;
     --stone-light:#9a8e8a;
