@@ -701,6 +701,41 @@
   /* Abwesenheits-Hinweis-Button: Pfeil darf nicht in eine eigene Zeile
      rutschen - auf schmalen Handys reicht der Platz sonst knapp nicht. */
   #modal-absence-cta { white-space: nowrap; }
+
+  /* Abwesenheits-Hinweis als kleines, nicht-blockierendes Banner statt
+     eines Vollbild-Modals beim Laden - vorher hat JEDE:R Besucher:in bei
+     jedem Seitenaufruf ein scrollsperrendes "Ordination geschlossen"-
+     Overlay bekommen (kein Dismiss-Merken), was plausibel massiv zu
+     kurzen Sitzungen/Abbrüchen beigetragen hat. Klick öffnet weiterhin
+     das bestehende Modal mit vollem Text + Portal-CTA. */
+  .absence-banner {
+    display: none;
+    position: fixed; z-index: 150;
+    left: 50%; bottom: 20px; transform: translateX(-50%);
+    max-width: calc(100% - 32px);
+    background: var(--rose); color: var(--white);
+    border-radius: 999px;
+    padding: 11px 18px 11px 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.22);
+    align-items: center; gap: 10px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .absence-banner:hover { box-shadow: 0 14px 36px rgba(0,0,0,0.28); }
+  .absence-banner.show { display: flex; }
+  .absence-banner .absence-banner-arrow { flex-shrink: 0; opacity: 0.85; }
+  .absence-banner-close {
+    flex-shrink: 0; background: rgba(255,255,255,0.15); border: none; border-radius: 50%;
+    width: 20px; height: 20px; color: var(--white); font-size: 0.7rem; line-height: 1;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .absence-banner-close:hover { background: rgba(255,255,255,0.28); }
+  @media (max-width: 640px) {
+    .absence-banner { font-size: 0.78rem; padding: 10px 14px; }
+  }
   @media (max-width: 480px) {
     #modal-absence-cta { font-size: 0.76rem; padding: 0.8rem 1.3rem; }
   }
@@ -2309,6 +2344,22 @@
     var whenDe = sameDay ? 'am ' + fromLbl : 'von ' + fromLbl + ' bis ' + toLbl;
     return 'Bitte beachten Sie, dass ' + whoDe + ' ' + whenDe + ' ' + predicateDe + ' ' + verbDe + '. In der Zwischenzeit können Sie jederzeit einen Termin über unser Patientenportal buchen.';
   }
+  // Kurzfassung fürs Banner (siehe .absence-banner) - nur Zeitraum +
+  // knapper Hinweis, volle Erklärung + Portal-CTA bleiben im Modal, das
+  // per Klick weiterhin aufgeht.
+  function absenceShortText(lang, n, fromLbl, toLbl) {
+    var sameDay = n.date_from === n.date_to;
+    if (lang === 'hu') {
+      var whenHu = sameDay ? fromLbl + '-án' : fromLbl + '–' + toLbl;
+      return (n.whole_practice ? 'Rendelőnk zárva: ' : 'Fontos tudnivaló: ') + whenHu;
+    }
+    if (lang === 'en') {
+      var whenEn = sameDay ? fromLbl : fromLbl + '–' + toLbl;
+      return (n.whole_practice ? 'Closed: ' : 'Notice: ') + whenEn;
+    }
+    var whenDe = sameDay ? fromLbl : fromLbl + '–' + toLbl;
+    return (n.whole_practice ? 'Ordination geschlossen: ' : 'Wichtiger Hinweis: ') + whenDe;
+  }
   // Das Modal feuert automatisch beim Seitenload, BEVOR der Besuch die
   // Sprache manuell umschalten könnte (setLang('de') läuft immer zuerst,
   // siehe Init unten) - currentLang wäre an dieser Stelle also praktisch
@@ -2343,7 +2394,10 @@
       if (titleEl) titleEl.textContent = ABSENCE_TITLES[lang] || ABSENCE_TITLES.de;
       if (textEl)  textEl.textContent  = absenceText(lang, n, fromLbl, toLbl);
       if (ctaEl)   { ctaEl.textContent = ABSENCE_CTAS[lang] || ABSENCE_CTAS.de; ctaEl.href = '__PORTAL_URL__?lang=' + lang; }
-      openModal('absence-notice');
+      var bannerTextEl = document.getElementById('absence-banner-text');
+      var bannerEl = document.getElementById('absence-banner');
+      if (bannerTextEl) bannerTextEl.textContent = absenceShortText(lang, n, fromLbl, toLbl);
+      if (bannerEl) bannerEl.classList.add('show');
     } catch(e) {
       console.log('Absence notice API unavailable');
     }
@@ -2383,6 +2437,15 @@
       <p id="modal-coming-soon-text" style="color:#5a4e4a">Das Online-Portal ist in Kürze verfügbar. Für Termine kontaktieren Sie uns bitte vorerst telefonisch.</p>
     </div>
   </div>
+</div>
+
+<!-- ABWESENHEITS-HINWEIS BANNER (klein, nicht-blockierend - ersetzt das
+     frühere automatisch aufgehende Vollbild-Modal, siehe loadAbsenceNotice().
+     Klick öffnet das Modal darunter mit vollem Text + Portal-Link. -->
+<div class="absence-banner" id="absence-banner" onclick="openModal('absence-notice')">
+  <span id="absence-banner-text"></span>
+  <span class="absence-banner-arrow">&#8594;</span>
+  <button class="absence-banner-close" onclick="event.stopPropagation(); document.getElementById('absence-banner').classList.remove('show')" aria-label="Schließen">&#x2715;</button>
 </div>
 
 <!-- ABWESENHEITS-HINWEIS MODAL (nur sichtbar, wenn im Dashboard eine
