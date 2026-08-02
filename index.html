@@ -777,12 +777,15 @@
     #modal-absence-cta { font-size: 0.76rem; padding: 0.8rem 1.3rem; }
   }
 
-  /* Kurzes, eng begrenztes Versteck-Fenster NUR für die 3 Logo-Bilder
-     (nicht Texte/Buttons wie beim früheren, breiteren Mechanismus) - der
-     Leavio-Platzhalter soll nicht sichtbar aufblitzen, bevor das echte
-     Praxislogo da ist. 400ms statt vorher 2,5s hält den FCP-Preis dafür
-     klein (siehe Script unten), der Rest der Seite ist davon unberührt. */
-  .logo-pending { opacity: 0; transition: opacity 0.15s ease; }
+  /* Kurzes, eng begrenztes Versteck-Fenster für die 3 Logo-Bilder UND
+     (siehe .brand-pending) den Praxisnamen/-Untertitel + Portal-Buttons -
+     der Leavio-Platzhalter-Text bzw. die Leavio-Standardfarbe (--rose,
+     Navy) sollen nicht sichtbar aufblitzen, bevor die echten Praxisdaten
+     da sind. 400ms statt vorher 2,5s hält den FCP-Preis dafür klein
+     (siehe Script unten) - bewusst nur diese wenigen Elemente, NICHT der
+     frühere breite Ansatz mit allen Cormorant-Garamond-Überschriften
+     site-weit, der FCP/LCP im Lab-Test spürbar verschlechtert hatte. */
+  .logo-pending, .brand-pending { opacity: 0; transition: opacity 0.15s ease; }
 
   /* REVIEWS */
   .reviews-section { padding: 5rem 8vw; background: var(--cream); }
@@ -815,7 +818,7 @@
       <span style="color:var(--border)">|</span>
       <a href="#" class="nav-lang-btn" data-lang="en" onclick="setLang('en');return false;" style="font-size:0.72rem;font-weight:500;letter-spacing:0.08em;color:var(--stone-light)">EN</a>
     </div>
-    <a href="__PORTAL_URL__?lang=de" id="nav-portal" class="portal-link nav-cta">Online Portal</a>
+    <a href="__PORTAL_URL__?lang=de" id="nav-portal" class="portal-link nav-cta brand-pending">Online Portal</a>
   </div>
   <div style="display:none;align-items:center;gap:10px" class="mobile-controls">
     <div style="display:flex;gap:2px;border:0.5px solid var(--border);border-radius:3px;overflow:hidden">
@@ -838,16 +841,16 @@
 <section class="hero">
   <div class="hero-left">
     <div class="hero-eyebrow">
-      <span class="label" id="hero-eyebrow">Musterordination · Wien</span>
+      <span class="label brand-pending" id="hero-eyebrow">Musterordination · Wien</span>
     </div>
     <h1 class="display hero-display" id="hero-h1">
       Digitale Ordination<br>mit <em>Erfahrung</em><br>und Herz.
     </h1>
-    <p class="hero-subtitle" id="hero-sub">
+    <p class="hero-subtitle brand-pending" id="hero-sub">
       OA Dr. Max Muster und OÄ Dr. Erika Muster betreuen Patient:innen aller Altersgruppen in ihrer Ordination in Wien.
     </p>
     <div class="hero-actions">
-      <a href="__PORTAL_URL__?lang=de" id="hero-cta1" class="portal-link btn-primary">
+      <a href="__PORTAL_URL__?lang=de" id="hero-cta1" class="portal-link btn-primary brand-pending">
         Termin online anfragen
       </a>
       <a href="#ueber-uns" id="hero-cta2" class="btn-outline">Über die Ordination</a>
@@ -1008,7 +1011,7 @@
           <span id="portal-f4">Verfügbar auf Deutsch, Ungarisch und Englisch</span>
         </div>
       </div>
-      <a href="__PORTAL_URL__?lang=de" id="portal-cta" class="portal-link btn-primary">
+      <a href="__PORTAL_URL__?lang=de" id="portal-cta" class="portal-link btn-primary brand-pending">
         Portal öffnen →
       </a>
     </div>
@@ -1018,13 +1021,13 @@
         <div class="portal-dot" style="background:#ff5f57"></div>
         <div class="portal-dot" style="background:#ffbd2e"></div>
         <div class="portal-dot" style="background:#28c840"></div>
-        <span class="portal-widget-title" id="portal-widget-title">Patientenportal · Ordination Dr. Muster</span>
+        <span class="portal-widget-title brand-pending" id="portal-widget-title">Patientenportal · Ordination Dr. Muster</span>
       </div>
       <div class="portal-iframe-wrap">
         <div class="portal-iframe-overlay">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#1B2A4A" stroke-width="1.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           <p id="portal-badge">Sicher, diskret &amp; immer verfügbar</p>
-          <a href="__PORTAL_URL__?lang=de" class="btn-primary portal-link" style="font-size:0.75rem;padding:0.7rem 1.4rem">
+          <a href="__PORTAL_URL__?lang=de" class="btn-primary portal-link brand-pending" style="font-size:0.75rem;padding:0.7rem 1.4rem">
             Zum Portal
           </a>
         </div>
@@ -1069,7 +1072,7 @@
         </p>
       </div>
 
-      <a id="kontakt-cta" href="__PORTAL_URL__?lang=de" class="portal-link btn-primary">
+      <a id="kontakt-cta" href="__PORTAL_URL__?lang=de" class="portal-link btn-primary brand-pending">
         Online Termin anfragen
       </a>
     </div>
@@ -1639,19 +1642,27 @@
   // genau einen Kunden (echt oder fiktiver Testkunde) gebunden - daher lädt
   // die Seite die echten Praxisdaten live vom Backend statt Platzhaltertext
   // zu zeigen. Ein früherer "unsichtbar bis alles geladen"-Mechanismus
-  // (Klasse "pending-data") vermied zwar den kurzen Muster-/Leavio-
-  // Platzhalter-Blitzer, hat aber FCP/LCP im PageSpeed-Lab-Test spürbar
-  // verschlechtert (Inhalte blieben bis zu 2,5s unsichtbar) - schnelle
-  // erste Anzeige wiegt schwerer, daher entfernt: Platzhalter werden jetzt
-  // wieder direkt sichtbar durch die echten Daten ersetzt - außer den 3
-  // Logo-Bildern (siehe .logo-pending/loadLogo()): die bleiben maximal
-  // 400ms unsichtbar, damit nicht kurz das Leavio-Logo statt des echten
-  // Praxislogos aufblitzt, ohne dabei spürbar auf FCP/LCP zu drücken.
-  setTimeout(function() {
-    document.querySelectorAll('.logo-pending').forEach(function(el) {
-      el.classList.remove('logo-pending');
+  // (Klasse "pending-data", viele Cormorant-Garamond-Überschriften +
+  // Buttons + Logos, bis zu 2,5s Sicherheits-Timeout) vermied zwar den
+  // Muster-/Leavio-Platzhalter-Blitzer komplett, hat aber FCP/LCP im
+  // PageSpeed-Lab-Test spürbar verschlechtert. Live-Feedback zeigte aber:
+  // ganz ohne jede Absicherung fällt der Blitzer (Navy-Buttons vor der
+  // echten Praxisfarbe, "Musterordination" vor dem echten Namen) sehr
+  // unangenehm auf ("wie gehackt"). Kompromiss: nur die wenigen wirklich
+  // sichtbaren Platzhalter-Elemente (.logo-pending/.brand-pending) bleiben
+  // maximal 400ms unsichtbar - kurz genug, um FCP/LCP kaum zu belasten
+  // (siehe frühere Messung: reale Ladezeit der Praxisdaten ~200-300ms),
+  // lang genug, um den Blitzer zuverlässig abzudecken. Der Rest der Seite
+  // (alle anderen Überschriften/Texte) ist davon unberührt.
+  var _brandPendingRevealed = false;
+  function _revealBrandPending() {
+    if (_brandPendingRevealed) return;
+    _brandPendingRevealed = true;
+    document.querySelectorAll('.logo-pending, .brand-pending').forEach(function(el) {
+      el.classList.remove('logo-pending', 'brand-pending');
     });
-  }, 400);
+  }
+  setTimeout(_revealBrandPending, 400);
   loadPracticeSettings();
   loadLogo();
   loadOpeningHours();
@@ -2229,8 +2240,10 @@
       if (practiceName) _practiceName = practiceName;
 
       setLang(currentLang);
+      _revealBrandPending();
     } catch(e) {
       console.log('Practice settings API unavailable, using defaults');
+      _revealBrandPending();
     }
   }
 
@@ -2692,7 +2705,7 @@
 
 <!-- Sticky mobile portal button -->
 <div id="sticky-portal-bar">
-  <a id="sticky-portal-btn" href="__PORTAL_URL__?lang=de" class="portal-link">
+  <a id="sticky-portal-btn" href="__PORTAL_URL__?lang=de" class="portal-link brand-pending">
     Jetzt Termin buchen →
   </a>
 </div>
