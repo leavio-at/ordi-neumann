@@ -1650,8 +1650,14 @@
   // echten Praxisfarbe, "Musterordination" vor dem echten Namen) sehr
   // unangenehm auf ("wie gehackt"). Kompromiss: nur die wenigen wirklich
   // sichtbaren Platzhalter-Elemente (.logo-pending/.brand-pending) bleiben
-  // maximal 400ms unsichtbar - kurz genug, um FCP/LCP kaum zu belasten
-  // (siehe frühere Messung: reale Ladezeit der Praxisdaten ~200-300ms),
+  // maximal 700ms unsichtbar - kurz genug, um FCP/LCP kaum zu belasten
+  // (siehe frühere Messung: reale Ladezeit der Praxisdaten ~200-300ms,
+  // 700ms lässt spürbar Luft für langsamere/gedrosselte Verbindungen -
+  // ein erster PageSpeed-Lab-Testlauf mit 400ms hat den Blitzer bei einem
+  // ungünstig gedrosselten Durchlauf noch kurz durchgelassen, ein zweiter
+  // Durchlauf war deutlich schneller - reine Lab-Test-Schwankung, kein
+  // grundsätzlicher Fehler, aber 700ms senkt die Häufigkeit solcher
+  // Ausreißer, ohne wieder in die alte 2,5s-Verzögerung zurückzufallen),
   // lang genug, um den Blitzer zuverlässig abzudecken. Der Rest der Seite
   // (alle anderen Überschriften/Texte) ist davon unberührt.
   var _brandPendingRevealed = false;
@@ -1662,7 +1668,7 @@
       el.classList.remove('logo-pending', 'brand-pending');
     });
   }
-  setTimeout(_revealBrandPending, 400);
+  setTimeout(_revealBrandPending, 700);
   loadPracticeSettings();
   loadLogo();
   loadOpeningHours();
