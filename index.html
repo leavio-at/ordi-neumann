@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de" class="fonts-pending">
+<html lang="de">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -57,49 +57,29 @@
 <link rel="apple-touch-icon" href="__BACKEND_URL__/public/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- display=optional hätte auf diesem Gerät riskiert, dass der Browser
-     dauerhaft bei der Fallback-Schrift "hängen bleibt" statt später auf
-     Cormorant Garamond zu wechseln - genau das wurde live beobachtet
-     (Text blieb durchgehend fett/Fallback statt nur kurz beim ersten
-     Laden). Daher wieder swap (schaltet IMMER auf die Web-Schrift um,
-     sobald sie da ist), kombiniert mit einem eigenen Sichtbarkeits-Gate
-     (Klasse "fonts-pending" auf <html>, siehe Script unten + CSS-Regel
-     oben): Texte bleiben unsichtbar, bis die Web-Schrift bestätigt geladen
-     ist - dadurch sieht niemand mehr den Fallback-Zwischenzustand, egal
-     wie lange das Laden dauert.
-
-     Als <link rel="stylesheet"> blockierte dieser Request bisher das
-     erste Rendering (von PageSpeed als "Anfragen zum Blockieren des
-     Renderings" mit ~2s geschätzter Einsparung markiert). preload+onload-
-     Swap lädt die CSS-Datei mit hoher Priorität parallel, ohne den
-     Seitenaufbau darauf warten zu lassen - unser eigenes Sichtbarkeits-
-     Gate oben verhindert ohnehin jeden sichtbaren Fallback-Zwischenstand,
-     das Blockieren war also gar nicht nötig. noscript sichert Browser
-     ohne JavaScript ab. -->
+<!-- Ein früherer Versuch (Klasse "fonts-pending", Texte unsichtbar bis
+     Web-Schrift bestätigt geladen) hat den sichtbaren Fett→Dünn-Sprung
+     zwar vermieden, aber FCP/LCP im PageSpeed-Lab-Test auf ~3s hochgetrieben
+     (Inhalte blieben bis zum Sicherheits-Timeout unsichtbar) - schnelle
+     erste Anzeige wiegt schwerer als der kurze, meist kaum wahrnehmbare
+     Schriftwechsel, daher wieder entfernt. preload+onload-Swap bleibt:
+     macht die Font-CSS nicht mehr render-blockierend (PageSpeed markierte
+     das mit ~2s geschätzter Einsparung), ohne Inhalte zu verstecken.
+     noscript sichert Browser ohne JavaScript ab. -->
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"></noscript>
-<script>
-  (function() {
-    function releaseFonts() { document.documentElement.classList.remove('fonts-pending'); }
-    if (document.fonts && document.fonts.load) {
-      Promise.all([
-        document.fonts.load('300 1em "Cormorant Garamond"'),
-        document.fonts.load('400 1em "Cormorant Garamond"'),
-        document.fonts.load('600 1em "Cormorant Garamond"')
-      ]).then(releaseFonts).catch(releaseFonts);
-    } else {
-      releaseFonts();
-    }
-    setTimeout(releaseFonts, 1500);
-  })();
-</script>
 <style>
   /* ── TOKENS ── */
   :root {
-    --rose:       #1B2A4A;
-    --rose-deep:  #14213a;
-    --rose-light: #eaf1ec;
-    --rose-mist:  #f2f7f3;
+    /* Neutraler Platzhalter-Grauton statt Leavio-Navy: bis
+       _applyBrandColors() die echte Praxisfarbe setzt (siehe
+       loadPracticeSettings()), soll ein kurz sichtbarer Startzustand nicht
+       wie eine fremde Marke aussehen, sondern einfach "noch ungestylt"
+       wirken - kostet anders als ein Versteck-Mechanismus keine Ladezeit. */
+    --rose:       #8a8078;
+    --rose-deep:  #6b6259;
+    --rose-light: #f0ede9;
+    --rose-mist:  #f7f5f3;
     --stone:      #2a2320;
     --stone-mid:  #5a4e4a;
     --stone-light:#9a8e8a;
@@ -122,33 +102,6 @@
   }
   img { display: block; max-width: 100%; }
   a { color: inherit; text-decoration: none; }
-
-  /* Cormorant Garamond wird explizit in Gewicht 300 (sehr leicht) verwendet -
-     der Fallback "serif" hat aber meist gar kein echtes Light-Gewicht und
-     rendert stattdessen in seinem Standard-/Fettgewicht, was "fett" wirkt.
-     display=optional (siehe Font-Link oben) verhindert zwar den Sprung
-     MITTEN im Rendern, kann aber je nach Netzwerktiming trotzdem beim
-     Fallback-Gewicht "hängen bleiben" statt auf die echte Schrift zu
-     wechseln. Deshalb zusätzlich per Font Loading API (siehe Script unten)
-     abgesichert: alle Cormorant-Garamond-Texte starten unsichtbar und
-     erscheinen erst, sobald die echte Schrift wirklich geladen ist - nie
-     ein sichtbarer "fett→dünn"-Zustand. */
-  .display, .heading, .subheading, .stat-number, .times-doc-name,
-  .leistung-name, .arzt-photo-initials, .team-atmo-caption, .lisa-name,
-  .arzt-name, .portal-iframe-overlay p, .footer-logo, .modal-header h2,
-  .modal-body h3, .review-text {
-    transition: opacity 0.2s ease;
-  }
-  html.fonts-pending .display, html.fonts-pending .heading,
-  html.fonts-pending .subheading, html.fonts-pending .stat-number,
-  html.fonts-pending .times-doc-name, html.fonts-pending .leistung-name,
-  html.fonts-pending .arzt-photo-initials, html.fonts-pending .team-atmo-caption,
-  html.fonts-pending .lisa-name, html.fonts-pending .arzt-name,
-  html.fonts-pending .portal-iframe-overlay p, html.fonts-pending .footer-logo,
-  html.fonts-pending .modal-header h2, html.fonts-pending .modal-body h3,
-  html.fonts-pending .review-text {
-    opacity: 0;
-  }
 
   /* ── TYPE SCALE ── */
   .display {
@@ -825,15 +778,16 @@
     .absence-banner { font-size: 0.78rem; padding: 10px 14px; }
   }
 
-  /* Verhindert den kurzen "Muster-/Leavio-Platzhalter"-Blitzer beim Laden
-     (Logo, Hero-Praxisname/-Untertitel, Portal-Buttons vor Markenfarben) -
-     alle mit dieser Klasse starten unsichtbar und werden gemeinsam in
-     einem Fade eingeblendet, sobald echte Daten da sind (siehe
-     _maybeReveal() im Script). */
-  .pending-data { opacity: 0; transition: opacity 0.25s ease; }
   @media (max-width: 480px) {
     #modal-absence-cta { font-size: 0.76rem; padding: 0.8rem 1.3rem; }
   }
+
+  /* Kurzes, eng begrenztes Versteck-Fenster NUR für die 3 Logo-Bilder
+     (nicht Texte/Buttons wie beim früheren, breiteren Mechanismus) - der
+     Leavio-Platzhalter soll nicht sichtbar aufblitzen, bevor das echte
+     Praxislogo da ist. 400ms statt vorher 2,5s hält den FCP-Preis dafür
+     klein (siehe Script unten), der Rest der Seite ist davon unberührt. */
+  .logo-pending { opacity: 0; transition: opacity 0.15s ease; }
 
   /* REVIEWS */
   .reviews-section { padding: 5rem 8vw; background: var(--cream); }
@@ -854,7 +808,7 @@
 
 <!-- NAV -->
 <nav>
-  <div class="nav-logo"><img id="nav-logo-img" class="pending-data" src="https://leavio.at/leavio-logo.png" alt="Praxislogo" onclick="window.scrollTo({top:0,behavior:'smooth'})"></div>
+  <div class="nav-logo"><img id="nav-logo-img" class="logo-pending" src="https://leavio.at/leavio-logo.png" alt="Praxislogo" onclick="window.scrollTo({top:0,behavior:'smooth'})"></div>
   <div class="nav-links">
     <a href="#leistungen" id="nav-leistungen">Leistungen</a>
     <a href="#ueber-uns" id="nav-ueber">Über uns</a>
@@ -866,7 +820,7 @@
       <span style="color:var(--border)">|</span>
       <a href="#" class="nav-lang-btn" data-lang="en" onclick="setLang('en');return false;" style="font-size:0.72rem;font-weight:500;letter-spacing:0.08em;color:var(--stone-light)">EN</a>
     </div>
-    <a href="__PORTAL_URL__?lang=de" id="nav-portal" class="portal-link nav-cta pending-data">Online Portal</a>
+    <a href="__PORTAL_URL__?lang=de" id="nav-portal" class="portal-link nav-cta">Online Portal</a>
   </div>
   <div style="display:none;align-items:center;gap:10px" class="mobile-controls">
     <div style="display:flex;gap:2px;border:0.5px solid var(--border);border-radius:3px;overflow:hidden">
@@ -889,16 +843,16 @@
 <section class="hero">
   <div class="hero-left">
     <div class="hero-eyebrow">
-      <span class="label pending-data" id="hero-eyebrow">Musterordination · Wien</span>
+      <span class="label" id="hero-eyebrow">Musterordination · Wien</span>
     </div>
     <h1 class="display hero-display" id="hero-h1">
       Digitale Ordination<br>mit <em>Erfahrung</em><br>und Herz.
     </h1>
-    <p class="hero-subtitle pending-data" id="hero-sub">
+    <p class="hero-subtitle" id="hero-sub">
       OA Dr. Max Muster und OÄ Dr. Erika Muster betreuen Patient:innen aller Altersgruppen in ihrer Ordination in Wien.
     </p>
     <div class="hero-actions">
-      <a href="__PORTAL_URL__?lang=de" id="hero-cta1" class="portal-link btn-primary pending-data">
+      <a href="__PORTAL_URL__?lang=de" id="hero-cta1" class="portal-link btn-primary">
         Termin online anfragen
       </a>
       <a href="#ueber-uns" id="hero-cta2" class="btn-outline">Über die Ordination</a>
@@ -923,7 +877,7 @@
     <div class="hero-pattern"></div>
 
     <div class="hero-logo-display">
-      <img id="hero-logo-img" class="pending-data" src="https://leavio.at/leavio-logo.png" alt="Leavio" style="width:clamp(150px,16vw,220px);aspect-ratio:2.2;object-fit:contain;opacity:0.95;filter:drop-shadow(0 4px 16px rgba(42,35,32,0.12));">
+      <img id="hero-logo-img" class="logo-pending" src="https://leavio.at/leavio-logo.png" alt="Leavio" style="width:clamp(150px,16vw,220px);aspect-ratio:2.2;object-fit:contain;opacity:0.95;filter:drop-shadow(0 4px 16px rgba(42,35,32,0.12));">
     </div>
     <div class="hero-times-card">
       <span class="label" id="times-title">Ordinationszeiten</span>
@@ -1059,7 +1013,7 @@
           <span id="portal-f4">Verfügbar auf Deutsch, Ungarisch und Englisch</span>
         </div>
       </div>
-      <a href="__PORTAL_URL__?lang=de" id="portal-cta" class="portal-link btn-primary pending-data">
+      <a href="__PORTAL_URL__?lang=de" id="portal-cta" class="portal-link btn-primary">
         Portal öffnen →
       </a>
     </div>
@@ -1069,13 +1023,13 @@
         <div class="portal-dot" style="background:#ff5f57"></div>
         <div class="portal-dot" style="background:#ffbd2e"></div>
         <div class="portal-dot" style="background:#28c840"></div>
-        <span class="portal-widget-title pending-data" id="portal-widget-title">Patientenportal · Ordination Dr. Muster</span>
+        <span class="portal-widget-title" id="portal-widget-title">Patientenportal · Ordination Dr. Muster</span>
       </div>
       <div class="portal-iframe-wrap">
         <div class="portal-iframe-overlay">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#1B2A4A" stroke-width="1.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           <p id="portal-badge">Sicher, diskret &amp; immer verfügbar</p>
-          <a href="__PORTAL_URL__?lang=de" class="btn-primary portal-link pending-data" style="font-size:0.75rem;padding:0.7rem 1.4rem">
+          <a href="__PORTAL_URL__?lang=de" class="btn-primary portal-link" style="font-size:0.75rem;padding:0.7rem 1.4rem">
             Zum Portal
           </a>
         </div>
@@ -1120,7 +1074,7 @@
         </p>
       </div>
 
-      <a id="kontakt-cta" href="__PORTAL_URL__?lang=de" class="portal-link btn-primary pending-data">
+      <a id="kontakt-cta" href="__PORTAL_URL__?lang=de" class="portal-link btn-primary">
         Online Termin anfragen
       </a>
     </div>
@@ -1165,7 +1119,7 @@
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-logo"><img id="footer-logo-img" class="pending-data" src="https://leavio.at/leavio-logo.png" alt="Praxislogo" style="height:32px;width:100px;object-fit:contain;object-position:left center;opacity:0.75;"></div>
+  <div class="footer-logo"><img id="footer-logo-img" class="logo-pending" src="https://leavio.at/leavio-logo.png" alt="Praxislogo" style="height:32px;width:100px;object-fit:contain;object-position:left center;opacity:0.75;"></div>
   <div class="footer-links">
     <a href="#" id="footer-impressum" onclick="openModal('impressum'); return false;">Impressum</a>
     <a href="#" id="footer-datenschutz" onclick="openModal('datenschutz'); return false;">Datenschutz</a>
@@ -1689,36 +1643,20 @@
   // Jede Instanz dieser Seite ist über BACKEND_URL (build.js-Token) fix an
   // genau einen Kunden (echt oder fiktiver Testkunde) gebunden - daher lädt
   // die Seite die echten Praxisdaten live vom Backend statt Platzhaltertext
-  // zu zeigen.
-  //
-  // Bis dahin bleiben Logo, Hero-Praxisname/-Untertitel und die Portal-
-  // Buttons (Klasse "pending-data", opacity:0) unsichtbar, statt kurz die
-  // Muster-/Leavio-Platzhalter bzw. die Leavio-Standardfarbe (--rose,
-  // Navy) zu zeigen und dann sichtbar gegen die echten Praxisdaten
-  // auszutauschen (FOUC). Statt jedes Element einzeln aufblitzen zu
-  // lassen, sobald SEIN Request fertig ist, warten wir auf BEIDE
-  // Datenquellen (Praxiseinstellungen inkl. Markenfarben + Logo) und
-  // blenden dann alles gemeinsam in einem einzigen, ruhigen Fade ein -
-  // wirkt bewusst geladen statt zusammengestückelt. Ein Timeout sichert
-  // das Ganze ab, falls ein Request ungewöhnlich lange braucht.
-  var _revealReady = { settings: false, logo: false };
-  var _revealed = false;
-  function _maybeReveal() {
-    if (_revealed || !_revealReady.settings || !_revealReady.logo) return;
-    _revealed = true;
-    document.querySelectorAll('.pending-data').forEach(function(el) {
-      el.classList.remove('pending-data');
-    });
-  }
-  function _markSettingsReady() { _revealReady.settings = true; _maybeReveal(); }
-  var _logoSettledCount = 0;
-  function _markLogoSettled() {
-    _logoSettledCount++;
-    if (_logoSettledCount >= 3) { _revealReady.logo = true; _maybeReveal(); }
-  }
+  // zu zeigen. Ein früherer "unsichtbar bis alles geladen"-Mechanismus
+  // (Klasse "pending-data") vermied zwar den kurzen Muster-/Leavio-
+  // Platzhalter-Blitzer, hat aber FCP/LCP im PageSpeed-Lab-Test spürbar
+  // verschlechtert (Inhalte blieben bis zu 2,5s unsichtbar) - schnelle
+  // erste Anzeige wiegt schwerer, daher entfernt: Platzhalter werden jetzt
+  // wieder direkt sichtbar durch die echten Daten ersetzt - außer den 3
+  // Logo-Bildern (siehe .logo-pending/loadLogo()): die bleiben maximal
+  // 400ms unsichtbar, damit nicht kurz das Leavio-Logo statt des echten
+  // Praxislogos aufblitzt, ohne dabei spürbar auf FCP/LCP zu drücken.
   setTimeout(function() {
-    _revealReady.settings = true; _revealReady.logo = true; _maybeReveal();
-  }, 2500);
+    document.querySelectorAll('.logo-pending').forEach(function(el) {
+      el.classList.remove('logo-pending');
+    });
+  }, 400);
   loadPracticeSettings();
   loadLogo();
   loadOpeningHours();
@@ -2296,10 +2234,8 @@
       if (practiceName) _practiceName = practiceName;
 
       setLang(currentLang);
-      _markSettingsReady();
     } catch(e) {
       console.log('Practice settings API unavailable, using defaults');
-      _markSettingsReady();
     }
   }
 
@@ -2320,9 +2256,9 @@
     // Ordinationszeiten, Fußzeile) - alle bekommen das echte Praxislogo.
     ['nav-logo-img', 'hero-logo-img', 'footer-logo-img'].forEach(function(id) {
       var img = document.getElementById(id);
-      if (!img) { _markLogoSettled(); return; }
+      if (!img) return;
       var fallback = img.src;
-      img.onload = function() { _markLogoSettled(); };
+      img.onload = function() { img.classList.remove('logo-pending'); };
       img.onerror = function() { img.onerror = null; img.src = fallback; };
       img.src = BACKEND_URL + '/public/logo';
     });
@@ -2757,7 +2693,7 @@
 
 <!-- Sticky mobile portal button -->
 <div id="sticky-portal-bar">
-  <a id="sticky-portal-btn" href="__PORTAL_URL__?lang=de" class="portal-link pending-data">
+  <a id="sticky-portal-btn" href="__PORTAL_URL__?lang=de" class="portal-link">
     Jetzt Termin buchen →
   </a>
 </div>
