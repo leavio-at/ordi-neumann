@@ -1889,7 +1889,7 @@
         var tags = (b.schwerpunkte || []).concat(ins ? [ins] : []);
         return '<div class="arzt-card">'
           + '<div class="arzt-photo-wrap">'
-          + (photo ? '<img class="arzt-photo-img" src="' + photo + '" alt="' + escapeHtml(d.display_name) + '">' : '')
+          + (photo ? '<img class="arzt-photo-img" src="' + photo + '?w=500" srcset="' + photo + '?w=500 500w, ' + photo + '?w=800 800w" sizes="(max-width: 900px) 90vw, 560px" alt="' + escapeHtml(d.display_name) + '">' : '')
           + '<div class="arzt-photo-bar"></div>'
           + '</div>'
           + (b.role ? '<span class="label arzt-role">' + escapeHtml(b.role) + '</span>' : '')
@@ -1946,7 +1946,7 @@
       var photo = _doctorPhotoMap[s.id] || '';
       return '<div class="lisa-row">'
         + '<div class="lisa-photo-wrap">'
-        + (photo ? '<img src="' + photo + '" alt="' + escapeHtml(s.display_name) + '">' : '')
+        + (photo ? '<img src="' + photo + '?w=400" alt="' + escapeHtml(s.display_name) + '">' : '')
         + '<div class="lisa-bar"></div>'
         + '</div>'
         + '<div class="lisa-info">'
@@ -2298,7 +2298,7 @@
           var item = document.createElement('div');
           item.className = 'team-atmo-item';
           var img = document.createElement('img');
-          img.src = BACKEND_URL + '/public/photos/' + p.id;
+          img.src = BACKEND_URL + '/public/photos/' + p.id + '?w=600';
           img.alt = p.label || 'Ordination';
           img.loading = 'lazy';
           img.style.objectPosition = '50% ' + (p.focal_y != null ? p.focal_y : 50) + '%';
