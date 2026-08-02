@@ -648,6 +648,10 @@
       font-size: 0.9rem; font-weight: 600; letter-spacing: 0.01em;
       text-decoration: none;
       box-shadow: 0 3px 14px rgba(155,79,122,0.30);
+      /* Fehlte hier bisher (anders als .btn-primary/.nav-cta) - ohne
+         Transition sprang die Farbe beim Wechsel von der Navy-Default-
+         Farbe auf die echte Praxisfarbe hart um statt weich zu blenden. */
+      transition: background 0.2s;
     }
     body { padding-bottom: 74px; }
   }
