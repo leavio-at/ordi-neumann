@@ -347,6 +347,15 @@
     padding: 2rem;
     border-radius: 4px;
     box-shadow: 0 4px 40px rgba(42,35,32,0.06);
+    /* Die frühere min-height nur auf .times-doc-name (Cormorant Garamond)
+       hat den gemessenen Layout-Shift kaum verringert - Ursache war auch
+       Inter (Standard-Body-Schrift, .times-contact/.times-doc-day/-hours
+       verwenden sie ungesetzt), das nicht mitgegated war. Statt jedes
+       einzelne Element zu jagen: die ganze Karte bekommt eine Mindesthöhe,
+       die JEDE Schriftmetrik-Differenz beim Fallback→Web-Font-Wechsel
+       absorbiert (box-sizing:border-box, siehe globaler Reset - Padding
+       ist hier schon eingerechnet). */
+    min-height: 300px;
   }
   .times-row {
     display: grid;
@@ -359,12 +368,6 @@
     font-family: 'Cormorant Garamond', serif;
     font-size: 1rem;
     font-weight: 600;
-    line-height: 1.3;
-    /* Reserviert Platz für 2 Zeilen unabhängig davon, ob der Name (in der
-       schmalen Grid-Spalte) beim Laden mit Fallback- oder Cormorant-
-       Garamond-Schrift ein- oder zweizeilig umbricht - verhindert den
-       CLS-Sprung von .hero-times-card beim Schriftwechsel. */
-    min-height: calc(1.3em * 2);
     color: var(--stone);
     margin-bottom: 0.4rem;
   }
