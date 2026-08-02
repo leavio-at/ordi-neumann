@@ -2248,14 +2248,18 @@
     // Leavio-Standardbild wieder her, falls kein eigenes Logo hochgeladen
     // wurde (404) oder das Backend nicht erreichbar ist. Drei Stellen im
     // Template zeigen ein Logo (Nav-Leiste, große Hero-Anzeige über den
-    // Ordinationszeiten, Fußzeile) - alle bekommen das echte Praxislogo.
-    ['nav-logo-img', 'hero-logo-img', 'footer-logo-img'].forEach(function(id) {
+    // Ordinationszeiten, Fußzeile) - alle bekommen das echte Praxislogo,
+    // jeweils in einer zur tatsächlichen Box-Größe passenden Breite (?w=,
+    // retina-sicher verdoppelt) statt überall derselben vollen Datei
+    // (PageSpeed bemängelte das konkret).
+    var logoWidths = { 'nav-logo-img': 320, 'hero-logo-img': 440, 'footer-logo-img': 200 };
+    Object.keys(logoWidths).forEach(function(id) {
       var img = document.getElementById(id);
       if (!img) return;
       var fallback = img.src;
       img.onload = function() { img.classList.remove('logo-pending'); };
       img.onerror = function() { img.onerror = null; img.src = fallback; };
-      img.src = BACKEND_URL + '/public/logo';
+      img.src = BACKEND_URL + '/public/logo?w=' + logoWidths[id];
     });
   }
 
