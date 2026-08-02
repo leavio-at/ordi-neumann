@@ -56,7 +56,15 @@
 <link rel="icon" type="image/png" href="__BACKEND_URL__/public/logo">
 <link rel="apple-touch-icon" href="__BACKEND_URL__/public/logo">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- display=optional statt swap: verhindert den "erst fett/system, dann
+     dünn/Cormorant"-Sprung bei jedem Laden (FOUT) - zeigt die Fallback-
+     Schrift nur, wenn die Web-Schrift nicht binnen ~100ms bereitsteht,
+     tauscht dann aber NICHT mehr mitten im Rendern aus. Trade-off: bei
+     sehr langsamer erster Verbindung bleibt für diesen einen Seitenaufruf
+     die Fallback-Schrift stehen statt nachträglich zu wechseln - für eine
+     Praxis-Website ist das unauffälliger als der Sprung selbst. -->
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=optional" rel="stylesheet">
 <style>
   /* ── TOKENS ── */
   :root {
@@ -734,19 +742,30 @@
   }
   .absence-banner-close:hover { background: rgba(255,255,255,0.28); }
   /* Unter 900px überlagert #sticky-portal-bar (bottom:0, ~74px hoch,
-     gleicher z-index, später im DOM) sonst das Banner komplett -
-     deshalb hier über die Leiste heben und im Stapel nach vorne holen. */
+     gleicher z-index, später im DOM) sonst das Banner komplett - deshalb
+     hier über die Leiste heben und im Stapel nach vorne holen. env()
+     berücksichtigt zusätzlich die Home-Indicator-Aussparung (iPhone ohne
+     Home-Button), die die Leiste dort höher macht als die fixen 74px -
+     ohne das reichte der Abstand auf solchen Geräten knapp nicht.
+     Rechtsbündig statt zentriert, damit es nicht mit dem darunter
+     ebenfalls zentrierten "Jetzt Termin buchen"-Button optisch konkurriert. */
   @media (max-width: 900px) {
-    .absence-banner { bottom: calc(74px + 14px); z-index: 151; }
+    .absence-banner {
+      left: auto; right: 14px; transform: none;
+      max-width: calc(100% - 28px);
+      bottom: calc(74px + env(safe-area-inset-bottom) + 14px);
+      z-index: 151;
+    }
   }
   @media (max-width: 640px) {
     .absence-banner { font-size: 0.78rem; padding: 10px 14px; }
   }
 
-  /* Verhindert den kurzen "Muster-/Leavio-Platzhalter"-Blitzer beim Laden:
-     Logos + Hero-Praxisname/-Untertitel starten unsichtbar und werden erst
-     eingeblendet, sobald die echten Praxisdaten da sind (siehe
-     _revealHeroText()/loadLogo() im Script). */
+  /* Verhindert den kurzen "Muster-/Leavio-Platzhalter"-Blitzer beim Laden
+     (Logo, Hero-Praxisname/-Untertitel, Portal-Buttons vor Markenfarben) -
+     alle mit dieser Klasse starten unsichtbar und werden gemeinsam in
+     einem Fade eingeblendet, sobald echte Daten da sind (siehe
+     _maybeReveal() im Script). */
   .pending-data { opacity: 0; transition: opacity 0.25s ease; }
   @media (max-width: 480px) {
     #modal-absence-cta { font-size: 0.76rem; padding: 0.8rem 1.3rem; }
@@ -783,7 +802,7 @@
       <span style="color:var(--border)">|</span>
       <a href="#" class="nav-lang-btn" data-lang="en" onclick="setLang('en');return false;" style="font-size:0.72rem;font-weight:500;letter-spacing:0.08em;color:var(--stone-light)">EN</a>
     </div>
-    <a href="__PORTAL_URL__?lang=de" id="nav-portal" class="portal-link nav-cta">Online Portal</a>
+    <a href="__PORTAL_URL__?lang=de" id="nav-portal" class="portal-link nav-cta pending-data">Online Portal</a>
   </div>
   <div style="display:none;align-items:center;gap:10px" class="mobile-controls">
     <div style="display:flex;gap:2px;border:0.5px solid var(--border);border-radius:3px;overflow:hidden">
@@ -815,7 +834,7 @@
       OA Dr. Max Muster und OÄ Dr. Erika Muster betreuen Patient:innen aller Altersgruppen in ihrer Ordination in Wien.
     </p>
     <div class="hero-actions">
-      <a href="__PORTAL_URL__?lang=de" id="hero-cta1" class="portal-link btn-primary">
+      <a href="__PORTAL_URL__?lang=de" id="hero-cta1" class="portal-link btn-primary pending-data">
         Termin online anfragen
       </a>
       <a href="#ueber-uns" id="hero-cta2" class="btn-outline">Über die Ordination</a>
@@ -976,7 +995,7 @@
           <span id="portal-f4">Verfügbar auf Deutsch, Ungarisch und Englisch</span>
         </div>
       </div>
-      <a href="__PORTAL_URL__?lang=de" id="portal-cta" class="portal-link btn-primary">
+      <a href="__PORTAL_URL__?lang=de" id="portal-cta" class="portal-link btn-primary pending-data">
         Portal öffnen →
       </a>
     </div>
@@ -986,13 +1005,13 @@
         <div class="portal-dot" style="background:#ff5f57"></div>
         <div class="portal-dot" style="background:#ffbd2e"></div>
         <div class="portal-dot" style="background:#28c840"></div>
-        <span class="portal-widget-title" id="portal-widget-title">Patientenportal · Ordination Dr. Muster</span>
+        <span class="portal-widget-title pending-data" id="portal-widget-title">Patientenportal · Ordination Dr. Muster</span>
       </div>
       <div class="portal-iframe-wrap">
         <div class="portal-iframe-overlay">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#1B2A4A" stroke-width="1.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           <p id="portal-badge">Sicher, diskret &amp; immer verfügbar</p>
-          <a href="__PORTAL_URL__?lang=de" class="btn-primary portal-link" style="font-size:0.75rem;padding:0.7rem 1.4rem">
+          <a href="__PORTAL_URL__?lang=de" class="btn-primary portal-link pending-data" style="font-size:0.75rem;padding:0.7rem 1.4rem">
             Zum Portal
           </a>
         </div>
@@ -1037,7 +1056,7 @@
         </p>
       </div>
 
-      <a id="kontakt-cta" href="__PORTAL_URL__?lang=de" class="portal-link btn-primary">
+      <a id="kontakt-cta" href="__PORTAL_URL__?lang=de" class="portal-link btn-primary pending-data">
         Online Termin anfragen
       </a>
     </div>
@@ -1608,27 +1627,33 @@
   // die Seite die echten Praxisdaten live vom Backend statt Platzhaltertext
   // zu zeigen.
   //
-  // Bis dahin bleiben Logo + Hero-Praxisname/-Untertitel (Klasse
-  // "pending-data", opacity:0) unsichtbar, statt kurz die Muster-/Leavio-
-  // Platzhalter zu zeigen und dann sichtbar auszutauschen (FOUC).
-  // _revealHeroText() schaltet sie sichtbar - normal aus loadPracticeSettings()
-  // (Erfolg oder Fehlschlag), zusätzlich per Timeout abgesichert, falls der
-  // Request ungewöhnlich lange braucht.
-  var _heroRevealed = false;
-  function _revealHeroText() {
-    if (_heroRevealed) return;
-    _heroRevealed = true;
-    ['hero-eyebrow', 'hero-sub'].forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) el.classList.remove('pending-data');
+  // Bis dahin bleiben Logo, Hero-Praxisname/-Untertitel und die Portal-
+  // Buttons (Klasse "pending-data", opacity:0) unsichtbar, statt kurz die
+  // Muster-/Leavio-Platzhalter bzw. die Leavio-Standardfarbe (--rose,
+  // Navy) zu zeigen und dann sichtbar gegen die echten Praxisdaten
+  // auszutauschen (FOUC). Statt jedes Element einzeln aufblitzen zu
+  // lassen, sobald SEIN Request fertig ist, warten wir auf BEIDE
+  // Datenquellen (Praxiseinstellungen inkl. Markenfarben + Logo) und
+  // blenden dann alles gemeinsam in einem einzigen, ruhigen Fade ein -
+  // wirkt bewusst geladen statt zusammengestückelt. Ein Timeout sichert
+  // das Ganze ab, falls ein Request ungewöhnlich lange braucht.
+  var _revealReady = { settings: false, logo: false };
+  var _revealed = false;
+  function _maybeReveal() {
+    if (_revealed || !_revealReady.settings || !_revealReady.logo) return;
+    _revealed = true;
+    document.querySelectorAll('.pending-data').forEach(function(el) {
+      el.classList.remove('pending-data');
     });
   }
-  setTimeout(_revealHeroText, 2500);
+  function _markSettingsReady() { _revealReady.settings = true; _maybeReveal(); }
+  var _logoSettledCount = 0;
+  function _markLogoSettled() {
+    _logoSettledCount++;
+    if (_logoSettledCount >= 3) { _revealReady.logo = true; _maybeReveal(); }
+  }
   setTimeout(function() {
-    ['nav-logo-img', 'hero-logo-img', 'footer-logo-img'].forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) el.classList.remove('pending-data');
-    });
+    _revealReady.settings = true; _revealReady.logo = true; _maybeReveal();
   }, 2500);
   loadPracticeSettings();
   loadLogo();
@@ -2207,10 +2232,10 @@
       if (practiceName) _practiceName = practiceName;
 
       setLang(currentLang);
-      _revealHeroText();
+      _markSettingsReady();
     } catch(e) {
       console.log('Practice settings API unavailable, using defaults');
-      _revealHeroText();
+      _markSettingsReady();
     }
   }
 
@@ -2231,9 +2256,9 @@
     // Ordinationszeiten, Fußzeile) - alle bekommen das echte Praxislogo.
     ['nav-logo-img', 'hero-logo-img', 'footer-logo-img'].forEach(function(id) {
       var img = document.getElementById(id);
-      if (!img) return;
+      if (!img) { _markLogoSettled(); return; }
       var fallback = img.src;
-      img.onload = function() { img.classList.remove('pending-data'); };
+      img.onload = function() { _markLogoSettled(); };
       img.onerror = function() { img.onerror = null; img.src = fallback; };
       img.src = BACKEND_URL + '/public/logo';
     });
@@ -2668,7 +2693,7 @@
 
 <!-- Sticky mobile portal button -->
 <div id="sticky-portal-bar">
-  <a id="sticky-portal-btn" href="__PORTAL_URL__?lang=de" class="portal-link">
+  <a id="sticky-portal-btn" href="__PORTAL_URL__?lang=de" class="portal-link pending-data">
     Jetzt Termin buchen →
   </a>
 </div>
