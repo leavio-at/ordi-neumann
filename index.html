@@ -66,8 +66,18 @@
      (Klasse "fonts-pending" auf <html>, siehe Script unten + CSS-Regel
      oben): Texte bleiben unsichtbar, bis die Web-Schrift bestätigt geladen
      ist - dadurch sieht niemand mehr den Fallback-Zwischenzustand, egal
-     wie lange das Laden dauert. -->
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+     wie lange das Laden dauert.
+
+     Als <link rel="stylesheet"> blockierte dieser Request bisher das
+     erste Rendering (von PageSpeed als "Anfragen zum Blockieren des
+     Renderings" mit ~2s geschätzter Einsparung markiert). preload+onload-
+     Swap lädt die CSS-Datei mit hoher Priorität parallel, ohne den
+     Seitenaufbau darauf warten zu lassen - unser eigenes Sichtbarkeits-
+     Gate oben verhindert ohnehin jeden sichtbaren Fallback-Zwischenstand,
+     das Blockieren war also gar nicht nötig. noscript sichert Browser
+     ohne JavaScript ab. -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"></noscript>
 <script>
   (function() {
     function releaseFonts() { document.documentElement.classList.remove('fonts-pending'); }
@@ -187,7 +197,9 @@
   }
   .nav-logo img {
     height: 44px;
-    width: auto;
+    width: 160px;
+    object-fit: contain;
+    object-position: left center;
     display: block;
   }
 
@@ -347,6 +359,12 @@
     font-family: 'Cormorant Garamond', serif;
     font-size: 1rem;
     font-weight: 600;
+    line-height: 1.3;
+    /* Reserviert Platz für 2 Zeilen unabhängig davon, ob der Name (in der
+       schmalen Grid-Spalte) beim Laden mit Fallback- oder Cormorant-
+       Garamond-Schrift ein- oder zweizeilig umbricht - verhindert den
+       CLS-Sprung von .hero-times-card beim Schriftwechsel. */
+    min-height: calc(1.3em * 2);
     color: var(--stone);
     margin-bottom: 0.4rem;
   }
@@ -902,7 +920,7 @@
     <div class="hero-pattern"></div>
 
     <div class="hero-logo-display">
-      <img id="hero-logo-img" class="pending-data" src="https://leavio.at/leavio-logo.png" alt="Leavio" style="width:clamp(150px,16vw,220px);opacity:0.95;filter:drop-shadow(0 4px 16px rgba(42,35,32,0.12));">
+      <img id="hero-logo-img" class="pending-data" src="https://leavio.at/leavio-logo.png" alt="Leavio" style="width:clamp(150px,16vw,220px);aspect-ratio:2.2;object-fit:contain;opacity:0.95;filter:drop-shadow(0 4px 16px rgba(42,35,32,0.12));">
     </div>
     <div class="hero-times-card">
       <span class="label" id="times-title">Ordinationszeiten</span>
@@ -1144,7 +1162,7 @@
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-logo"><img id="footer-logo-img" class="pending-data" src="https://leavio.at/leavio-logo.png" alt="Praxislogo" style="height:32px;width:auto;opacity:0.75;"></div>
+  <div class="footer-logo"><img id="footer-logo-img" class="pending-data" src="https://leavio.at/leavio-logo.png" alt="Praxislogo" style="height:32px;width:100px;object-fit:contain;object-position:left center;opacity:0.75;"></div>
   <div class="footer-links">
     <a href="#" id="footer-impressum" onclick="openModal('impressum'); return false;">Impressum</a>
     <a href="#" id="footer-datenschutz" onclick="openModal('datenschutz'); return false;">Datenschutz</a>
