@@ -2279,9 +2279,21 @@
       var img = document.getElementById(id);
       if (!img) return;
       var fallback = img.src;
+      var logoUrl = BACKEND_URL + '/public/logo?w=' + logoWidths[id];
+      // Ein einmaliger Versuch, dieselbe URL erneut zu laden, bevor auf den
+      // Leavio-Platzhalter zurückgefallen wird - live beobachtet, dass das
+      // echte Praxislogo gelegentlich beim ersten Versuch fehlschlägt
+      // (vermutlich transiente Netzwerk-/Backend-Hänger), nicht dauerhaft
+      // fehlt. Ohne Retry wurde in diesem Fall fälschlich dauerhaft der
+      // Leavio-Platzhalter für den restlichen Seitenaufruf gezeigt.
+      var retried = false;
       img.onload = function() { img.classList.remove('logo-pending'); };
-      img.onerror = function() { img.onerror = null; img.src = fallback; };
-      img.src = BACKEND_URL + '/public/logo?w=' + logoWidths[id];
+      img.onerror = function() {
+        if (!retried) { retried = true; img.src = logoUrl; return; }
+        img.onerror = null;
+        img.src = fallback;
+      };
+      img.src = logoUrl;
     });
   }
 
