@@ -21,3 +21,12 @@ services:
       - path: /*
         name: Strict-Transport-Security
         value: max-age=31536000; includeSubDomains
+      # Render-Standard für das HTML-Dokument war s-maxage=300 (Cloudflare-
+      # Edge cacht 5 Minuten) - erklärt vermutlich, warum wiederholte
+      # Live-Tests direkt nach einem Push noch die vorige Version zeigten,
+      # obwohl der Fix schon deployt war. no-cache erzwingt eine
+      # Revalidierung bei jedem Request (dank ETag/Last-Modified als
+      # günstiger 304-Request, kein voller Re-Download nötig).
+      - path: /
+        name: Cache-Control
+        value: no-cache
