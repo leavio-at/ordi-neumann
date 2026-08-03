@@ -1654,13 +1654,15 @@
   // echten Praxisfarbe, "Musterordination" vor dem echten Namen) sehr
   // unangenehm auf ("wie gehackt"). Kompromiss: nur die wenigen wirklich
   // sichtbaren Platzhalter-Elemente (.logo-pending/.brand-pending) bleiben
-  // maximal 1000ms unsichtbar - kurz genug, um FCP/LCP nicht wieder auf
-  // das alte ~3s-Niveau zu heben, aber lang genug, um auch bei spürbar
-  // langsameren Verbindungen (400ms und 700ms haben den Blitzer live noch
-  // wiederholt kurz durchgelassen - kein reiner Lab-Test-Ausreißer,
-  // sondern reale, konsistente Ladezeit über den kurzen Fenstern) die
-  // echten Praxisdaten abzuwarten. Der Rest der Seite (alle anderen
-  // Überschriften/Texte) ist davon unberührt.
+  // maximal 2000ms unsichtbar - deutlich großzügiger als die vorigen
+  // 400ms/700ms/1000ms, die den Blitzer live alle noch wiederholt kurz
+  // durchgelassen haben (keine Lab-Test-Ausreißer, sondern reale,
+  // konsistente Ladezeit über den kürzeren Fenstern bei diesem Nutzer).
+  // Immer noch unter der ursprünglichen 2,5s-Verzögerung, aber der
+  // eigentliche Hebel gegen FCP/LCP ist ohnehin, dass NUR diese wenigen
+  // Elemente betroffen sind (nicht mehr alle Cormorant-Garamond-
+  // Überschriften site-weit wie beim ursprünglichen, verworfenen Ansatz).
+  // Der Rest der Seite (alle anderen Überschriften/Texte) ist unberührt.
   var _brandPendingRevealed = false;
   function _revealBrandPending() {
     if (_brandPendingRevealed) return;
@@ -1669,7 +1671,7 @@
       el.classList.remove('logo-pending', 'brand-pending');
     });
   }
-  setTimeout(_revealBrandPending, 1000);
+  setTimeout(_revealBrandPending, 2000);
   loadPracticeSettings();
   loadLogo();
   loadOpeningHours();
