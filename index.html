@@ -759,6 +759,9 @@
     cursor: pointer; display: flex; align-items: center; justify-content: center;
   }
   .absence-banner-close:hover { background: rgba(255,255,255,0.28); }
+  @media (max-width: 640px) {
+    .absence-banner { font-size: 0.78rem; padding: 10px 14px; }
+  }
   /* Unter 900px überlagert #sticky-portal-bar (bottom:0, ~74px hoch,
      gleicher z-index, später im DOM) sonst das Banner komplett - deshalb
      hier über die Leiste heben und im Stapel nach vorne holen. env()
@@ -773,10 +776,6 @@
       z-index: 151;
     }
   }
-  @media (max-width: 640px) {
-    .absence-banner { font-size: 0.78rem; padding: 10px 14px; }
-  }
-
   @media (max-width: 480px) {
     #modal-absence-cta { font-size: 0.76rem; padding: 0.8rem 1.3rem; }
   }
@@ -1682,7 +1681,21 @@
   loadAbsenceNotice();
 
   // ── Privacy-friendly Analytics (keine Cookies, kein Tracking-Banner nötig) ──
+  // Opt-out für eigene/interne Test-Besuche (Praxis-Feedback 2026-08-06:
+  // eigenes Testen verfälscht sonst Sitzungen/Conversion-Rate). Einmal
+  // "?notrack=1" an die URL anhängen (z.B. https://.../?notrack=1) setzt
+  // ein dauerhaftes localStorage-Flag für dieses Browser/Gerät - danach
+  // wird nichts mehr getrackt, auch ohne den Parameter erneut anzuhängen.
+  function _notrackActive() {
+    try {
+      if (new URLSearchParams(location.search).get('notrack') === '1') {
+        localStorage.setItem('_leavio_notrack', '1');
+      }
+      return localStorage.getItem('_leavio_notrack') === '1';
+    } catch (e) { return false; }
+  }
   function trackEvent(type, target) {
+    if (_notrackActive()) return;
     try {
       fetch(BACKEND_URL + '/track', {
         method: 'POST', mode: 'cors', keepalive: true,
