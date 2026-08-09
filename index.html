@@ -1716,7 +1716,9 @@
   document.querySelectorAll('.portal-link').forEach(function(el) {
     el.addEventListener('click', function() { trackEvent('portal_click'); });
   });
-  // Echtzeit-"gerade online"-Zähler: kurzer Lebenszeichen-Puls, solange der Tab sichtbar ist
+  // Echtzeit-"gerade online"-Zähler: kurzer Lebenszeichen-Puls, solange der Tab sichtbar ist.
+  // Erster Puls sofort (setInterval feuert sonst erst nach 25s, spürbare Verzögerung im Live-Zähler).
+  if (document.visibilityState === 'visible') trackEvent('heartbeat');
   setInterval(function() {
     if (document.visibilityState === 'visible') trackEvent('heartbeat');
   }, 25000);
