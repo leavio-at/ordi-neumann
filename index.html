@@ -1644,7 +1644,7 @@
         };
       } else {
         a.onclick = null;
-        a.setAttribute('target', '_blank');
+        a.removeAttribute('target');
         a.href = '__PORTAL_URL__?lang=' + lang;
       }
     });
