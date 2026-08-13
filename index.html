@@ -814,23 +814,23 @@
     <a href="#leistungen" id="nav-leistungen">Leistungen</a>
     <a href="#ueber-uns" id="nav-ueber">Über uns</a>
     <a href="#kontakt" id="nav-kontakt">Kontakt</a>
-    <div style="display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:2px;padding:3px 8px">
+    <div id="nav-lang-group-desktop" style="display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:2px;padding:3px 8px">
       <a href="#" class="nav-lang-btn active" data-lang="de" onclick="setLang('de');return false;" style="font-size:0.72rem;font-weight:500;letter-spacing:0.08em;color:var(--stone-mid)">DE</a>
-      <span style="color:var(--border)">|</span>
+      <span class="nav-lang-sep" style="color:var(--border)">|</span>
       <a href="#" class="nav-lang-btn" data-lang="hu" onclick="setLang('hu');return false;" style="font-size:0.72rem;font-weight:500;letter-spacing:0.08em;color:var(--stone-light)">HU</a>
-      <span style="color:var(--border)">|</span>
+      <span class="nav-lang-sep" style="color:var(--border)">|</span>
       <a href="#" class="nav-lang-btn" data-lang="en" onclick="setLang('en');return false;" style="font-size:0.72rem;font-weight:500;letter-spacing:0.08em;color:var(--stone-light)">EN</a>
     </div>
     <a href="__PORTAL_URL__?lang=de" id="nav-portal" class="portal-link nav-cta brand-pending">Online Portal</a>
   </div>
   <div style="display:none;align-items:center;gap:10px" class="mobile-controls">
-    <div style="display:flex;gap:2px;border:0.5px solid var(--border);border-radius:3px;overflow:hidden">
+    <div id="nav-lang-group-mobile" style="display:flex;gap:2px;border:0.5px solid var(--border);border-radius:3px;overflow:hidden">
       <a href="#" class="nav-lang-btn active" data-lang="de" onclick="setLang('de');return false;"
          style="font-size:0.68rem;font-weight:600;padding:4px 7px;color:var(--stone-mid);text-decoration:none;letter-spacing:0.06em">DE</a>
-      <span style="width:0.5px;background:var(--border);display:block"></span>
+      <span class="nav-lang-sep" style="width:0.5px;background:var(--border);display:block"></span>
       <a href="#" class="nav-lang-btn" data-lang="hu" onclick="setLang('hu');return false;"
          style="font-size:0.68rem;font-weight:500;padding:4px 7px;color:var(--stone-light);text-decoration:none;letter-spacing:0.06em">HU</a>
-      <span style="width:0.5px;background:var(--border);display:block"></span>
+      <span class="nav-lang-sep" style="width:0.5px;background:var(--border);display:block"></span>
       <a href="#" class="nav-lang-btn" data-lang="en" onclick="setLang('en');return false;"
          style="font-size:0.68rem;font-weight:500;padding:4px 7px;color:var(--stone-light);text-decoration:none;letter-spacing:0.06em">EN</a>
     </div>
@@ -1451,6 +1451,39 @@
     hu: 'Az online portál hamarosan elérhető lesz. Időpontért kérjük, egyelőre telefonon keressen minket.',
     en: 'The online portal will be available soon. For appointments, please contact us by phone for now.',
   };
+
+  // Blendet Trenner (".nav-lang-sep") zwischen den Sprachumschalter-Buttons
+  // passend aus, wenn eine Sprache deaktiviert ist - sonst bliebe z.B. bei
+  // nur DE+HU ein überzähliger Trenner nach HU stehen (der ursprünglich zu
+  // EN führte), oder bei DE+EN (HU deaktiviert, mittlerer Button versteckt)
+  // blieben beide Trenner rund um die Lücke stehen statt nur einem. Generisch
+  // für beliebig viele Buttons/Trenner geschrieben, falls künftig eine
+  // vierte Sprache dazukommt: pro Lücke zwischen zwei sichtbaren Buttons
+  // wird genau der erste dort liegende Trenner gezeigt, alle weiteren bis
+  // zum nächsten sichtbaren Button werden unterdrückt.
+  function _updateLangSeparators(container) {
+    if (!container) return;
+    var children = Array.prototype.slice.call(container.children);
+    var n = children.length;
+    var isVisibleBtn = children.map(function(el) {
+      return el.classList.contains('nav-lang-btn') && el.style.display !== 'none';
+    });
+    // hasVisibleFrom[i] = gibt es ab Index i (inklusive) noch einen sichtbaren Button?
+    var hasVisibleFrom = new Array(n + 1).fill(false);
+    for (var i = n - 1; i >= 0; i--) hasVisibleFrom[i] = isVisibleBtn[i] || hasVisibleFrom[i + 1];
+    var sawVisibleButton = false;
+    var sepShownForThisGap = false;
+    children.forEach(function(el, idx) {
+      if (el.classList.contains('nav-lang-btn')) {
+        if (isVisibleBtn[idx]) { sawVisibleButton = true; sepShownForThisGap = false; }
+        return;
+      }
+      if (!el.classList.contains('nav-lang-sep')) return;
+      var show = sawVisibleButton && !sepShownForThisGap && hasVisibleFrom[idx + 1];
+      el.style.display = show ? '' : 'none';
+      if (show) sepShownForThisGap = true;
+    });
+  }
 
   function setLang(lang) {
     currentLang = lang;
@@ -2262,6 +2295,25 @@
       // portal-widget-title dort), damit auch ein späterer manueller
       // Sprachwechsel den echten Praxisnamen nicht wieder verliert.
       if (practiceName) _practiceName = practiceName;
+
+      // enabled_languages steuert, welche Sprachumschalter-Buttons sichtbar
+      // sind (Desktop-Nav, Mobil-Nav, Footer - alle drei teilen die Klasse
+      // .nav-lang-btn). 'de' ist immer enthalten (Backend-Validierung),
+      // daher ist hier keine currentLang-Korrektur nötig - die Seite startet
+      // ohnehin immer mit 'de', nie mit einer URL-gewählten Sprache.
+      try {
+        var enabledLanguages = ['de', 'hu', 'en'];
+        var parsedLangs = JSON.parse(s.enabled_languages || '[]');
+        if (Array.isArray(parsedLangs) && parsedLangs.length && parsedLangs.indexOf('de') !== -1) enabledLanguages = parsedLangs;
+        ['de', 'hu', 'en'].forEach(function(code) {
+          var show = enabledLanguages.indexOf(code) !== -1;
+          document.querySelectorAll('.nav-lang-btn[data-lang="' + code + '"]').forEach(function(a) {
+            a.style.display = show ? '' : 'none';
+          });
+        });
+        _updateLangSeparators(document.getElementById('nav-lang-group-desktop'));
+        _updateLangSeparators(document.getElementById('nav-lang-group-mobile'));
+      } catch(e) { console.log('enabled_languages Update fehlgeschlagen:', e); }
 
       setLang(currentLang);
       _revealBrandPending();
