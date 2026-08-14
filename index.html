@@ -1452,6 +1452,40 @@
     en: 'The online portal will be available soon. For appointments, please contact us by phone for now.',
   };
 
+  // Hinweis-Modal vor Telefon-/E-Mail-Kontakt (Praxis-Wunsch 2026-08-14):
+  // die Analyse zeigte, dass die meisten Kontakt-Klicks auf die
+  // Telefonnummer gehen, obwohl viele Anliegen schneller übers Portal
+  // erledigt wären. Erscheint einmalig pro Besuch (siehe
+  // _leavio_contact_hint_seen in sessionStorage), danach funktionieren
+  // Telefon-/E-Mail-Links wieder normal ohne Zwischenschritt.
+  const CONTACT_HINT_TEXT = {
+    de: { titlePhone: 'Bevor Sie anrufen', titleEmail: 'Bevor Sie schreiben', body: 'Viele Anliegen lassen sich jederzeit rund um die Uhr über unser Patientenportal erledigen - ganz ohne Warten.', portalCta: 'Zum Patientenportal', continuePhone: 'Trotzdem anrufen', continueEmail: 'Trotzdem E-Mail schreiben' },
+    hu: { titlePhone: 'Mielőtt telefonálna', titleEmail: 'Mielőtt e-mailt írna', body: 'Sok ügyet a nap 24 órájában, várakozás nélkül el tud intézni páciensportálunkon keresztül.', portalCta: 'A páciensportálra', continuePhone: 'Mégis telefonálok', continueEmail: 'Mégis e-mailt írok' },
+    en: { titlePhone: 'Before you call', titleEmail: 'Before you email', body: 'Many concerns can be handled anytime, around the clock, through our patient portal - with no waiting.', portalCta: 'Go to patient portal', continuePhone: 'Call anyway', continueEmail: 'Email anyway' },
+  };
+  function _showContactHint(kind, targetHref) {
+    var lang = currentLang || 'de';
+    var tx = CONTACT_HINT_TEXT[lang] || CONTACT_HINT_TEXT.de;
+    var titleEl = document.getElementById('modal-contact-hint-title-text');
+    var textEl = document.getElementById('modal-contact-hint-text');
+    var portalEl = document.getElementById('modal-contact-hint-portal');
+    var contEl = document.getElementById('modal-contact-hint-continue');
+    if (titleEl) titleEl.textContent = kind === 'email' ? tx.titleEmail : tx.titlePhone;
+    if (textEl) textEl.textContent = tx.body;
+    if (portalEl) { portalEl.textContent = tx.portalCta; portalEl.href = '__PORTAL_URL__?lang=' + lang; }
+    if (contEl) {
+      contEl.textContent = kind === 'email' ? tx.continueEmail : tx.continuePhone;
+      contEl.onclick = function(e) { e.preventDefault(); closeModal(); window.location.href = targetHref; };
+    }
+    try { sessionStorage.setItem('_leavio_contact_hint_seen', '1'); } catch(e) {}
+    openModal('contact-hint');
+  }
+  function _contactLinkClick(e, kind) {
+    try { if (sessionStorage.getItem('_leavio_contact_hint_seen') === '1') return; } catch(err) {}
+    e.preventDefault();
+    _showContactHint(kind, e.currentTarget.href);
+  }
+
   // Blendet Trenner (".nav-lang-sep") zwischen den Sprachumschalter-Buttons
   // passend aus, wenn eine Sprache deaktiviert ist - sonst bliebe z.B. bei
   // nur DE+HU ein überzähliger Trenner nach HU stehen (der ursprünglich zu
@@ -1745,6 +1779,17 @@
   ['times-email-a','kontakt-email-a','impressum-email-a'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.addEventListener('click', function() { trackEvent('contact_click', 'email'); });
+  });
+  // Hinweis-Modal vor Telefon/E-Mail (siehe _showContactHint oben) -
+  // bewusst NICHT im Impressum, dort sucht niemand wegen eines Anliegens,
+  // sondern nach Rechtsdaten.
+  ['times-phone-a','kontakt-phone-a'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('click', function(e) { _contactLinkClick(e, 'phone'); });
+  });
+  ['times-email-a','kontakt-email-a'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('click', function(e) { _contactLinkClick(e, 'email'); });
   });
   document.querySelectorAll('.portal-link').forEach(function(el) {
     el.addEventListener('click', function() { trackEvent('portal_click'); });
@@ -2598,6 +2643,28 @@
     </div>
     <div class="modal-body">
       <p id="modal-coming-soon-text" style="color:#5a4e4a">Das Online-Portal ist in Kürze verfügbar. Für Termine kontaktieren Sie uns bitte vorerst telefonisch.</p>
+    </div>
+  </div>
+</div>
+
+<!-- KONTAKT-HINWEIS MODAL (vor Telefon/E-Mail, siehe _showContactHint) -->
+<div class="modal-backdrop" id="modal-contact-hint" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box" style="max-width:440px">
+    <div class="modal-header">
+      <h2 id="modal-contact-hint-title" style="display:flex;align-items:center;gap:0.6rem">
+        <span style="width:34px;height:34px;border-radius:50%;background:var(--rose-mist);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--rose)" stroke-width="1.5"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2z"/><path d="M12 8v4l3 3"/></svg>
+        </span>
+        <span id="modal-contact-hint-title-text">Bevor Sie anrufen</span>
+      </h2>
+      <button class="modal-close" onclick="closeModal()">&#x2715;</button>
+    </div>
+    <div class="modal-body" style="text-align:center">
+      <p id="modal-contact-hint-text" style="color:#5a4e4a;margin-bottom:1.6rem">Viele Anliegen lassen sich jederzeit rund um die Uhr über unser Patientenportal erledigen - ganz ohne Warten.</p>
+      <div style="display:flex;flex-direction:column;gap:0.7rem">
+        <a id="modal-contact-hint-portal" href="__PORTAL_URL__?lang=de" class="btn-primary portal-link" style="color:var(--white);justify-content:center">Zum Patientenportal</a>
+        <a id="modal-contact-hint-continue" href="#" class="btn-outline" style="justify-content:center">Trotzdem anrufen</a>
+      </div>
     </div>
   </div>
 </div>
