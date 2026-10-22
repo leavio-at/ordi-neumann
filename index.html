@@ -806,6 +806,8 @@
 </style>
 </head>
 <body>
+<script type="application/json" id="leavio-snapshot">__SNAPSHOT__</script>
+<div id="update-notice" style="display:none;position:fixed;inset:0;z-index:100000;align-items:center;justify-content:center;padding:24px;text-align:center;background:#fff;color:#222;font-family:system-ui,-apple-system,Segoe UI,sans-serif;"><div><h1 style="font-size:1.4rem;margin:0 0 .6rem">Wir aktualisieren gerade</h1><p style="margin:0;line-height:1.5">Die Seite ist in Kürze wieder verfügbar.<br>Bitte versuchen Sie es in wenigen Minuten noch einmal.</p></div></div>
 
 <!-- NAV -->
 <nav>
@@ -1696,6 +1698,55 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
   var BACKEND_URL = '__BACKEND_URL__';
+
+  // ── DATENQUELLEN: Momentaufnahme -> Browser-Zwischenspeicher -> live ──
+  // Die Seite zeigt NIE die Vorlagentexte (Musterordination, Dr. Max Muster ...).
+  // Echte Praxisdaten kommen aus drei Quellen, in dieser Reihenfolge:
+  //  1. Momentaufnahme: build.js holt sie beim Bauen vom Backend und bettet sie
+  //     in <script id="leavio-snapshot"> ein (hat die Seite immer dabei).
+  //  2. Browser-Zwischenspeicher: letzte erfolgreiche Antwort dieses Besuchers,
+  //     aber nur wenn sie jünger ist als die Momentaufnahme.
+  //  3. Live-Abruf: überschreibt beides, sobald das Backend antwortet.
+  // Steht keine Quelle zur Verfügung (und das Backend antwortet nicht), bleibt
+  // die Seite hinter dem Hinweis "Wir aktualisieren gerade" (siehe
+  // _showUpdateNotice) statt Mustertext zu zeigen.
+  var _SNAP = {};
+  try { _SNAP = JSON.parse(document.getElementById('leavio-snapshot').textContent) || {}; } catch (e) { _SNAP = {}; }
+  var _SNAP_TIME = Number(_SNAP.__built) || 0;
+  var _CACHE_PREFIX = 'leavio_site_v1:' + BACKEND_URL + ':';
+  function _readCache(path) {
+    try {
+      var raw = localStorage.getItem(_CACHE_PREFIX + path);
+      var entry = raw ? JSON.parse(raw) : null;
+      if (entry && entry.data && Number(entry.t) >= _SNAP_TIME) return entry.data;
+    } catch (e) {}
+    return null;
+  }
+  function _writeCache(path, data) {
+    try { localStorage.setItem(_CACHE_PREFIX + path, JSON.stringify({ t: Date.now(), data: data })); } catch (e) {}
+  }
+  function _safeApply(path, apply, data) {
+    try { apply(data); } catch (e) { console.log('Anzeige von ' + path + ' fehlgeschlagen:', e); }
+  }
+  // apply(data) muss mehrfach aufrufbar sein (erst Momentaufnahme/Cache, dann live).
+  async function _getJson(path, apply) {
+    var seed = _readCache(path) || _SNAP[path] || null;
+    var seedJson = seed ? JSON.stringify(seed) : null;
+    if (seed) _safeApply(path, apply, seed);
+    try {
+      var ctrl = new AbortController();
+      setTimeout(function(){ ctrl.abort(); }, 30000);
+      var resp = await fetch(BACKEND_URL + path, { signal: ctrl.signal });
+      if (!resp.ok) return false;
+      var data = await resp.json();
+      _writeCache(path, data);
+      if (JSON.stringify(data) !== seedJson) _safeApply(path, apply, data);
+      return true;
+    } catch (e) {
+      console.log(path + ' nicht erreichbar' + (seed ? ', Momentaufnahme/Zwischenspeicher bleibt' : ''));
+      return false;
+    }
+  }
   // Müssen vor dem ersten setLang()-Aufruf initialisiert sein, da setLang()
   // über renderDoctorsUI() bereits darauf zugreift (var-Hoisting hebt nur
   // die Deklaration, nicht die Zuweisung, an den Skriptanfang).
@@ -1737,7 +1788,29 @@
       el.classList.remove('logo-pending', 'brand-pending');
     });
   }
-  setTimeout(_revealBrandPending, 2000);
+  // Ohne echte Daten wird NIE aufgedeckt: nach 2 s erscheint stattdessen der
+  // Hinweis "Wir aktualisieren gerade" und die Daten werden alle 6 s erneut
+  // angefragt, bis sie da sind.
+  var _ready = { settings: false, hours: false };
+  var _retryTimer = null;
+  function _showUpdateNotice() {
+    var el = document.getElementById('update-notice');
+    if (el) el.style.display = 'flex';
+  }
+  function _hideUpdateNoticeIfReady() {
+    if (!(_ready.settings && _ready.hours)) return;
+    var el = document.getElementById('update-notice');
+    if (el) el.style.display = 'none';
+    if (_retryTimer) { clearInterval(_retryTimer); _retryTimer = null; }
+  }
+  setTimeout(function() {
+    if (_ready.settings && _ready.hours) return;
+    _showUpdateNotice();
+    _retryTimer = setInterval(function() {
+      if (!_ready.settings) loadPracticeSettings();
+      if (!_ready.hours) loadOpeningHours();
+    }, 6000);
+  }, 2000);
   loadPracticeSettings();
   loadLogo();
   loadOpeningHours();
@@ -2066,33 +2139,20 @@
   }
 
   async function loadStaff() {
-    try {
-      var ctrl = new AbortController();
-      setTimeout(function(){ ctrl.abort(); }, 30000);
-      var resp = await fetch(BACKEND_URL + '/public/staff', { signal: ctrl.signal });
-      if (!resp.ok) return;
-      var data = await resp.json();
+    await _getJson('/public/staff', function(data) {
       _staffData = data.data || [];
       renderStaffUI();
-    } catch(e) {
-      console.log('Staff API unavailable, using defaults');
-    }
+    });
   }
 
   async function loadOpeningHours() {
-    try {
-      var controller = new AbortController();
-      setTimeout(function(){ controller.abort(); }, 30000);
-      var resp = await fetch(BACKEND_URL + '/public/opening-hours', { signal: controller.signal });
-      if (!resp.ok) return;
-      var data = await resp.json();
+    await _getJson('/public/opening-hours', function(data) {
       if (!data.data || !data.data.length) return;
       _doctorsData = data.data;
+      _ready.hours = true;
+      _hideUpdateNoticeIfReady();
       renderDoctorsUI();
-    } catch(e) {
-      // Silently fall back to hardcoded defaults already in LANG_DATA
-      console.log('Opening hours API unavailable, using defaults');
-    }
+    });
   }
 
   // Markenfarben (--rose/--gold + abgeleitete Ton-Varianten) aus
@@ -2128,12 +2188,7 @@
 
   // ── PRAXISEINSTELLUNGEN DYNAMISCH LADEN ───────────────────────
   async function loadPracticeSettings() {
-    try {
-      var ctrl = new AbortController();
-      setTimeout(function(){ ctrl.abort(); }, 30000);
-      var resp = await fetch(BACKEND_URL + '/public/settings', { signal: ctrl.signal });
-      if (!resp.ok) return;
-      var data = await resp.json();
+    await _getJson('/public/settings', function(data) {
       var s = data.settings || {};
       _applyBrandColors(s);
 
@@ -2361,11 +2416,10 @@
       } catch(e) { console.log('enabled_languages Update fehlgeschlagen:', e); }
 
       setLang(currentLang);
+      _ready.settings = true;
       _revealBrandPending();
-    } catch(e) {
-      console.log('Practice settings API unavailable, using defaults');
-      _revealBrandPending();
-    }
+      _hideUpdateNoticeIfReady();
+    });
   }
 
   // ── PRAXISLOGO DYNAMISCH LADEN ───────────────────────────────────
@@ -2417,13 +2471,9 @@
   // /public/staff), nicht mehr über einen fixen Username wie 'dr-muster-m'
   // oder 'lisa' - funktioniert für beliebig viele Personen.
   async function loadDoctorPhotos() {
-    try {
-      var ctrl = new AbortController();
-      setTimeout(function(){ ctrl.abort(); }, 30000);
-      var resp = await fetch(BACKEND_URL + '/public/website-photos', { signal: ctrl.signal });
-      if (!resp.ok) return;
-      var data = await resp.json();
+    await _getJson('/public/website-photos', function(data) {
       var photos = data.photos || [];
+      Object.keys(_doctorPhotoMap).forEach(function(k) { delete _doctorPhotoMap[k]; });
 
       // Arztfotos nach user_id gruppieren (neuestes zuerst, da die API bereits
       // nach created_at DESC sortiert liefert)
@@ -2457,9 +2507,7 @@
           atmo.appendChild(item);
         });
       }
-    } catch(e) {
-      console.log('Doctor photos API unavailable, using static files');
-    }
+    });
   }
 
   // ── BIO/SCHWERPUNKTE DYNAMISCH LADEN (Ärzt:innen + Assistenz) ───
@@ -2471,12 +2519,7 @@
   // Eintrag (Account ohne Bio-Text oder role) bleibt der bestehende
   // Default bzw. eine leere Karte - kein zusätzlicher Sonderfall nötig.
   async function loadStaffBios() {
-    try {
-      var ctrl = new AbortController();
-      setTimeout(function(){ ctrl.abort(); }, 30000);
-      var resp = await fetch(BACKEND_URL + '/public/staff-bios', { signal: ctrl.signal });
-      if (!resp.ok) return;
-      var data = await resp.json();
+    await _getJson('/public/staff-bios', function(data) {
       var staff = data.staff || [];
 
       ['de','hu','en'].forEach(function(lang) {
@@ -2498,9 +2541,7 @@
 
       renderDoctorsUI();
       renderStaffUI();
-    } catch(e) {
-      console.log('Staff-Bios API unavailable, using defaults');
-    }
+    });
   }
 
   // Hinweis-Modal bei Praxisschließung (Urlaub etc.) - im Dashboard unter
