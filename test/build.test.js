@@ -94,8 +94,6 @@ test('the sample DocFinder link is replaced by the real one, or by the own site 
   const real = b.makeReplacements({ __built: 1, '/public/settings': SETTINGS, '/public/opening-hours': HOURS });
   assert.equal(real['https://www.docfinder.at/suche/arzt/ergebnis?searchterm=muster+wien'], 'https://www.docfinder.at/arzt/neumann');
 });
-  assert.ok(!/muster/i.test(Object.values(r2).filter(v => /docfinder|http/.test(v)).join(' ').replace(/https:\/\/www\.docfinder\.at\/suche[^ ]*muster\+wien/, '')) || true);
-});
 
 test('no snapshot is written as null (page then relies on cache/live)', () => {
   assert.equal(b.makeReplacements(null).__SNAPSHOT__, 'null');
