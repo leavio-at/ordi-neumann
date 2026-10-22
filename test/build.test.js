@@ -7,8 +7,9 @@ const http = require('http');
 const { spawnSync, spawn } = require('child_process');
 const b = require('../build.js');
 
-const SETTINGS = { status: 'ok', settings: { practice_name: 'Ordination Dr. Neumann', practice_full_name: 'Ordination Dr. Michael Neumann & Dr. Etelka Neumann', practice_address: 'Hofstattgasse 17/3, 1180 Wien', practice_city: 'Wien', website_docfinder_url: 'https://www.docfinder.at/arzt/neumann' } };
-const HOURS = { data: [{ id: 1, display_name: 'Dr. Michael Neumann' }] };
+const fx = require('./fixtures.js');
+const SETTINGS = fx.data['/public/settings'];
+const HOURS = fx.data['/public/opening-hours'];
 const quiet = () => {};
 
 function fakeFetch(map) {
@@ -64,8 +65,8 @@ test('snapshotToHtml cannot close the script block', () => {
 test('page title and meta come from the real data, never from the sample', () => {
   const m = b.deriveMeta(SETTINGS.settings, {});
   for (const v of Object.values(m)) assert.ok(!/muster/i.test(v), v);
-  assert.match(m.fullName, /Neumann/);
-  assert.match(m.description, /Hofstattgasse/);
+  assert.match(m.fullName, /Test/);
+  assert.match(m.description, /Probegasse/);
 });
 
 test('environment variables win over the data', () => {
@@ -96,13 +97,13 @@ test('writeDist embeds the snapshot and replaces every token', () => {
 
 test('makeReplacements reads the settings out of the backend answer wrapper', () => {
   const r = b.makeReplacements({ __built: 1, '/public/settings': SETTINGS, '/public/opening-hours': HOURS });
-  assert.match(r.__PRACTICE_FULL_NAME__, /Neumann/);
+  assert.match(r.__PRACTICE_FULL_NAME__, /Test/);
   assert.ok(!/muster/i.test(r.__OG_TITLE__ + r.__META_DESCRIPTION__));
 });
 
 test('the sample DocFinder link is replaced by the real one, or by the own site on real customer pages', () => {
   const real = b.makeReplacements({ __built: 1, '/public/settings': SETTINGS, '/public/opening-hours': HOURS });
-  assert.equal(real['https://www.docfinder.at/suche/arzt/ergebnis?searchterm=muster+wien'], 'https://www.docfinder.at/arzt/neumann');
+  assert.equal(real['https://www.docfinder.at/suche/arzt/ergebnis?searchterm=muster+wien'], 'https://www.docfinder.at/arzt/test');
 });
 
 test('with an embedded practice logo the page never contacts leavio.at for the placeholder', () => {
@@ -133,7 +134,7 @@ function startBackend(routes) {
 function runBuild(port, extraEnv) {
   return new Promise((resolve) => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'site-run-'));
-    for (const f of ['build.js', 'index.html']) fs.copyFileSync(path.join(__dirname, '..', f), path.join(dir, f));
+    for (const f of ['build.js', 'prerender.js', 'index.html']) fs.copyFileSync(path.join(__dirname, '..', f), path.join(dir, f));
     const child = spawn(process.execPath, [path.join(dir, 'build.js')], {
       env: { PATH: process.env.PATH, BUILD_ATTEMPTS: '1', BUILD_PAUSE_MS: '0', BACKEND_URL: `http://127.0.0.1:${port}`, ...extraEnv },
     });
@@ -159,7 +160,7 @@ test('production build with data contains the real name and the snapshot, no sam
   server.close();
   assert.equal(r.code, 0, r.out);
   const html = fs.readFileSync(path.join(r.dir, 'dist', 'index.html'), 'utf8');
-  assert.match(html, /<title>[^<]*Neumann/);
+  assert.match(html, /<title>[^<]*Test/);
   assert.ok(html.includes('"practice_full_name"'));
   assert.ok(!/__SNAPSHOT__/.test(html));
   const head = html.slice(0, html.indexOf('</head>'));

@@ -19,6 +19,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { prerender } = require('./prerender.js');
 
 const BACKEND_URL = process.env.BACKEND_URL || 'https://leavio-staging-backend.onrender.com';
 const SITE_URL     = process.env.SITE_URL     || 'https://ordi.leavio.at';
@@ -116,6 +117,44 @@ function deriveMeta(settings, env = process.env) {
   };
 }
 
+// Maschinenlesbare Daten für Suchmaschinen (JSON-LD) mit den echten Praxisdaten füllen.
+// Was wir nicht sicher wissen (Geokoordinaten, Preisklasse, Fachgebiet), wird entfernt
+// statt falsch zu stehen - Platzhalter-Koordinaten wären für Suchmaschinen schlimmer als keine.
+const SCHEMA_DAYS = { 1: 'Monday', 2: 'Tuesday', 3: 'Wednesday', 4: 'Thursday', 5: 'Friday', 6: 'Saturday', 7: 'Sunday' };
+
+function patchJsonLd(html, snapshot) {
+  const settings = ((snapshot || {})['/public/settings'] || {}).settings || {};
+  const doctors = ((snapshot || {})['/public/opening-hours'] || {}).data || [];
+  return html.replace(/(<script type="application\/ld\+json">)([\s\S]*?)(<\/script>)/, (all, open, body, close) => {
+    let ld;
+    try { ld = JSON.parse(body); } catch (e) { return all; }
+    const street = [settings.practice_street, settings.practice_house_number].filter(Boolean).join(' ');
+    const addr = Object.assign({ '@type': 'PostalAddress', addressCountry: 'AT' }, ld.address || {});
+    if (street) addr.streetAddress = street;
+    else if (settings.practice_address) addr.streetAddress = settings.practice_address;
+    if (settings.practice_zip) addr.postalCode = settings.practice_zip;
+    if (settings.practice_city) addr.addressLocality = settings.practice_city;
+    ld.address = addr;
+    if (settings.practice_phone) ld.telephone = settings.practice_phone;
+    if (settings.practice_email) ld.email = settings.practice_email;
+    if (settings.practice_address) ld.hasMap = 'https://maps.google.com/?q=' + encodeURIComponent(settings.practice_address);
+    const seen = new Set();
+    const specs = [];
+    for (const d of doctors) for (const h of d.hours || []) {
+      const day = SCHEMA_DAYS[h.weekday];
+      const key = day + h.time_from + h.time_to;
+      if (!day || seen.has(key)) continue;
+      seen.add(key);
+      specs.push({ '@type': 'OpeningHoursSpecification', dayOfWeek: day, opens: h.time_from, closes: h.time_to });
+    }
+    if (specs.length) ld.openingHoursSpecification = specs; else delete ld.openingHoursSpecification;
+    delete ld.geo;
+    delete ld.priceRange;
+    delete ld.medicalSpecialty;
+    return open + '\n' + JSON.stringify(ld, null, 2).replace(/</g, '\\u003c') + '\n' + close;
+  });
+}
+
 function makeReplacements(snapshot) {
   const settings = ((snapshot || {})['/public/settings'] || {}).settings;
   const meta = deriveMeta(settings);
@@ -140,7 +179,7 @@ function makeReplacements(snapshot) {
 }
 
 const TEXT_EXTENSIONS = new Set(['.html', '.js', '.json']);
-const SKIP = new Set(['build.js', 'dist', 'node_modules', '.git', 'test', 'package.json']);
+const SKIP = new Set(['build.js', 'prerender.js', 'dist', 'node_modules', '.git', 'test', 'package.json']);
 
 function writeDist(replacements, src, out) {
   fs.rmSync(out, { recursive: true, force: true });
@@ -204,13 +243,40 @@ async function main() {
   const OUT = path.join(__dirname, 'dist');
   writeDist(replacements, __dirname, OUT);
 
+  // Vorab-Darstellung: echte Inhalte direkt im HTML (Suchmaschinen, Link-Vorschau).
+  if (usable) {
+    try {
+      const file = path.join(OUT, 'index.html');
+      let html = patchJsonLd(fs.readFileSync(file, 'utf8'), usable);
+      const result = await prerender(html, usable);
+      fs.writeFileSync(file, result.html);
+      log(`Vorab-Darstellung: ${result.applied.length} Elemente eingetragen`);
+      if (result.leftovers.length) {
+        const list = result.leftovers.slice(0, 10).map(x => '  - ' + x).join('\n');
+        if (REQUIRE_SNAPSHOT) {
+          console.error(`FEHLER: Vorlagentext im sichtbaren HTML (${result.leftovers.length} Stellen):\n${list}`);
+          fs.rmSync(OUT, { recursive: true, force: true });
+          process.exit(1);
+        }
+        log(`Hinweis: Vorlagentext im sichtbaren HTML (${result.leftovers.length} Stellen, nur für Demo zulässig)`);
+      }
+    } catch (e) {
+      if (REQUIRE_SNAPSHOT) {
+        console.error('FEHLER: Vorab-Darstellung fehlgeschlagen:', e.message);
+        fs.rmSync(OUT, { recursive: true, force: true });
+        process.exit(1);
+      }
+      log('WARNUNG: Vorab-Darstellung fehlgeschlagen:', e.message);
+    }
+  }
+
   log('Build complete →', OUT);
   for (const [token, value] of Object.entries(replacements)) {
     log(` ${token} = ${token === '__SNAPSHOT__' ? (usable ? `${value.length} Zeichen` : 'keine') : value}`);
   }
 }
 
-module.exports = { fetchLogoDataUri, fetchJson, buildSnapshot, snapshotToHtml, deriveMeta, makeReplacements, writeDist, SNAPSHOT_PATHS, REQUIRED_PATHS };
+module.exports = { patchJsonLd, fetchLogoDataUri, fetchJson, buildSnapshot, snapshotToHtml, deriveMeta, makeReplacements, writeDist, SNAPSHOT_PATHS, REQUIRED_PATHS };
 
 if (require.main === module) {
   main().catch(e => { console.error('Build fehlgeschlagen:', e); process.exit(1); });
