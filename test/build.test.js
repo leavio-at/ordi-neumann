@@ -45,6 +45,16 @@ test('buildSnapshot keeps what it got and lists what is missing', async () => {
   assert.deepEqual(missing.sort(), ['/public/staff', '/public/staff-bios', '/public/website-photos']);
 });
 
+test('a small practice logo is embedded as data URI, a big or missing one is skipped', async () => {
+  const mk = (type, bytes, ok = true) => async () => ({ ok, headers: { get: () => type }, arrayBuffer: async () => new Uint8Array(bytes).buffer });
+  const small = await b.fetchLogoDataUri('http://x', { fetchImpl: mk('image/webp', 100) });
+  assert.match(small, /^data:image\/webp;base64,/);
+  assert.equal(await b.fetchLogoDataUri('http://x', { fetchImpl: mk('image/webp', 200 * 1024) }), null);
+  assert.equal(await b.fetchLogoDataUri('http://x', { fetchImpl: mk('text/html', 100) }), null);
+  assert.equal(await b.fetchLogoDataUri('http://x', { fetchImpl: mk('image/webp', 100, false) }), null);
+  assert.equal(await b.fetchLogoDataUri('http://x', { fetchImpl: async () => { throw new Error('down'); } }), null);
+});
+
 test('snapshotToHtml cannot close the script block', () => {
   const html = b.snapshotToHtml({ x: '</script><script>alert(1)</script>', y: ' ' });
   assert.ok(!html.includes('<'));

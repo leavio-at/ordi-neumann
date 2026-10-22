@@ -65,7 +65,26 @@ async function buildSnapshot(opts = {}) {
       missing.push(p);
     }
   }
+  const logo = await fetchLogoDataUri(backend, opts);
+  if (logo) snapshot.__logo = logo;
   return { snapshot, missing };
+}
+
+// Praxislogo als data:-URI (nur wenn klein): damit erscheint es auch, wenn das Backend
+// gerade nicht antwortet. Optional - ohne Logo bleibt der Standard der Seite.
+const LOGO_MAX_BYTES = 150 * 1024;
+async function fetchLogoDataUri(backendUrl, { fetchImpl = fetch, timeoutMs = 60000 } = {}) {
+  try {
+    const resp = await fetchImpl(backendUrl + '/public/logo?w=320', { signal: AbortSignal.timeout(timeoutMs) });
+    if (!resp.ok) return null;
+    const type = (resp.headers && resp.headers.get && resp.headers.get('content-type')) || '';
+    if (!/^image\/(webp|png|jpeg)/.test(type)) return null;
+    const buf = Buffer.from(await resp.arrayBuffer());
+    if (!buf.length || buf.length > LOGO_MAX_BYTES) return null;
+    return 'data:' + type.split(';')[0] + ';base64,' + buf.toString('base64');
+  } catch (e) {
+    return null;
+  }
 }
 
 // Der JSON-Block steht in HTML: "<" maskieren, damit nichts den Block beenden kann.
@@ -184,7 +203,7 @@ async function main() {
   }
 }
 
-module.exports = { fetchJson, buildSnapshot, snapshotToHtml, deriveMeta, makeReplacements, writeDist, SNAPSHOT_PATHS, REQUIRED_PATHS };
+module.exports = { fetchLogoDataUri, fetchJson, buildSnapshot, snapshotToHtml, deriveMeta, makeReplacements, writeDist, SNAPSHOT_PATHS, REQUIRED_PATHS };
 
 if (require.main === module) {
   main().catch(e => { console.error('Build fehlgeschlagen:', e); process.exit(1); });

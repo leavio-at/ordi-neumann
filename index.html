@@ -2452,7 +2452,8 @@
     Object.keys(logoWidths).forEach(function(id) {
       var img = document.getElementById(id);
       if (!img) return;
-      var fallback = img.src;
+      // Fallback: das beim Build eingebettete Praxislogo, sonst das Standardbild der Seite.
+      var fallback = _SNAP.__logo || img.src;
       var logoUrl = BACKEND_URL + '/public/logo?w=' + logoWidths[id];
       // Ein einmaliger Versuch, dieselbe URL erneut zu laden, bevor auf den
       // Leavio-Platzhalter zurückgefallen wird - live beobachtet, dass das

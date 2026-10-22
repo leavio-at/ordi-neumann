@@ -149,3 +149,8 @@ test('a seed that failed to render does not stop the identical live data from be
   await api._getJson('/p', () => { if (++calls === 1) throw new Error('table not ready'); });
   assert.equal(calls, 2);
 });
+
+test('the logo falls back to the embedded practice logo before the default image', () => {
+  const logo = slice('  function loadLogo() {', '  // ── PERSONALFOTOS');
+  assert.ok(logo.includes('var fallback = _SNAP.__logo || img.src;'));
+});
