@@ -1726,13 +1726,20 @@
     try { localStorage.setItem(_CACHE_PREFIX + path, JSON.stringify({ t: Date.now(), data: data })); } catch (e) {}
   }
   function _safeApply(path, apply, data) {
-    try { apply(data); } catch (e) { console.log('Anzeige von ' + path + ' fehlgeschlagen:', e); }
+    try { apply(data); return true; } catch (e) { console.log('Anzeige von ' + path + ' fehlgeschlagen:', e); return false; }
   }
   // apply(data) muss mehrfach aufrufbar sein (erst Momentaufnahme/Cache, dann live).
   async function _getJson(path, apply) {
     var seed = _readCache(path) || _SNAP[path] || null;
     var seedJson = seed ? JSON.stringify(seed) : null;
-    if (seed) _safeApply(path, apply, seed);
+    var seedOk = false;
+    if (seed) {
+      // Erst NACH dem restlichen Skript anwenden: viele Tabellen/Hilfen der Seite
+      // (Wochentage, Formate ...) sind weiter unten definiert. Ein Microtask läuft
+      // noch vor dem ersten Zeichnen, die Seite flackert also nicht.
+      await Promise.resolve();
+      seedOk = _safeApply(path, apply, seed);
+    }
     try {
       var ctrl = new AbortController();
       setTimeout(function(){ ctrl.abort(); }, 30000);
@@ -1740,7 +1747,8 @@
       if (!resp.ok) return false;
       var data = await resp.json();
       _writeCache(path, data);
-      if (JSON.stringify(data) !== seedJson) _safeApply(path, apply, data);
+      // Gleiche Daten nur dann überspringen, wenn die Momentaufnahme wirklich angezeigt wurde.
+      if (!seedOk || JSON.stringify(data) !== seedJson) _safeApply(path, apply, data);
       return true;
     } catch (e) {
       console.log(path + ' nicht erreichbar' + (seed ? ', Momentaufnahme/Zwischenspeicher bleibt' : ''));

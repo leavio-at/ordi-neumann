@@ -34,7 +34,7 @@ function makeEnv({ snap = {}, store = {}, fetchImpl } = {}) {
 
 const ok = body => async () => ({ ok: true, json: async () => body });
 
-test('the snapshot is applied immediately, before any network answer', async () => {
+test('the snapshot is applied right after the script ran, before any network answer', async () => {
   const applied = [];
   let release;
   const gate = new Promise(r => { release = r; });
@@ -43,7 +43,9 @@ test('the snapshot is applied immediately, before any network answer', async () 
     fetchImpl: async () => { await gate; return { ok: true, json: async () => ({ v: 'live' }) }; },
   });
   const p = api._getJson('/public/settings', d => applied.push(d.v));
-  assert.deepEqual(applied, ['snap'], 'seed must be applied synchronously');
+  assert.deepEqual(applied, [], 'seed waits until the rest of the page script has run');
+  await Promise.resolve(); await Promise.resolve();
+  assert.deepEqual(applied, ['snap'], 'seed applied before any network answer');
   release();
   await p;
   assert.deepEqual(applied, ['snap', 'live']);
@@ -139,4 +141,11 @@ test('the notice is hidden by default and shown/hidden via display, not the hidd
   const m = HTML.match(/<div id="update-notice" style="([^"]*)"/);
   assert.ok(m && m[1].startsWith('display:none'));
   assert.ok(HTML.includes("el.style.display = 'flex'"));
+});
+
+test('a seed that failed to render does not stop the identical live data from being rendered', async () => {
+  let calls = 0;
+  const { api } = makeEnv({ snap: { __built: 1, '/p': { a: 1 } }, fetchImpl: ok({ a: 1 }) });
+  await api._getJson('/p', () => { if (++calls === 1) throw new Error('table not ready'); });
+  assert.equal(calls, 2);
 });
