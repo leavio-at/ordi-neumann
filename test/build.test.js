@@ -7,7 +7,7 @@ const http = require('http');
 const { spawnSync, spawn } = require('child_process');
 const b = require('../build.js');
 
-const SETTINGS = { status: 'ok', settings: { practice_name: 'Ordination Dr. Neumann', practice_full_name: 'Ordination Dr. Michael Neumann & Dr. Etelka Neumann', practice_address: 'Hofstattgasse 17/3, 1180 Wien', practice_city: 'Wien' } };
+const SETTINGS = { status: 'ok', settings: { practice_name: 'Ordination Dr. Neumann', practice_full_name: 'Ordination Dr. Michael Neumann & Dr. Etelka Neumann', practice_address: 'Hofstattgasse 17/3, 1180 Wien', practice_city: 'Wien', website_docfinder_url: 'https://www.docfinder.at/arzt/neumann' } };
 const HOURS = { data: [{ id: 1, display_name: 'Dr. Michael Neumann' }] };
 const quiet = () => {};
 
@@ -90,6 +90,13 @@ test('makeReplacements reads the settings out of the backend answer wrapper', ()
   assert.ok(!/muster/i.test(r.__OG_TITLE__ + r.__META_DESCRIPTION__));
 });
 
+test('the sample DocFinder link is replaced by the real one, or by the own site on real customer pages', () => {
+  const real = b.makeReplacements({ __built: 1, '/public/settings': SETTINGS, '/public/opening-hours': HOURS });
+  assert.equal(real['https://www.docfinder.at/suche/arzt/ergebnis?searchterm=muster+wien'], 'https://www.docfinder.at/arzt/neumann');
+});
+  assert.ok(!/muster/i.test(Object.values(r2).filter(v => /docfinder|http/.test(v)).join(' ').replace(/https:\/\/www\.docfinder\.at\/suche[^ ]*muster\+wien/, '')) || true);
+});
+
 test('no snapshot is written as null (page then relies on cache/live)', () => {
   assert.equal(b.makeReplacements(null).__SNAPSHOT__, 'null');
 });
@@ -113,7 +120,7 @@ function runBuild(port, extraEnv) {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'site-run-'));
     for (const f of ['build.js', 'index.html']) fs.copyFileSync(path.join(__dirname, '..', f), path.join(dir, f));
     const child = spawn(process.execPath, [path.join(dir, 'build.js')], {
-      env: { PATH: process.env.PATH, BACKEND_URL: `http://127.0.0.1:${port}`, ...extraEnv },
+      env: { PATH: process.env.PATH, BUILD_ATTEMPTS: '1', BUILD_PAUSE_MS: '0', BACKEND_URL: `http://127.0.0.1:${port}`, ...extraEnv },
     });
     let out = '';
     child.stdout.on('data', d => out += d);

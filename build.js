@@ -35,6 +35,7 @@ const SNAPSHOT_PATHS = ['/public/settings', '/public/opening-hours', '/public/st
 const REQUIRED_PATHS = ['/public/settings', '/public/opening-hours'];
 
 const SAMPLE_WORD = /muster/i;
+const DOCFINDER_DEFAULT = 'https://www.docfinder.at/suche/arzt/ergebnis?searchterm=muster+wien';
 
 async function fetchJson(url, { fetchImpl = fetch, attempts = 3, timeoutMs = 60000, pauseMs = 5000, log = console.log } = {}) {
   let lastError;
@@ -91,7 +92,9 @@ function deriveMeta(settings, env = process.env) {
 }
 
 function makeReplacements(snapshot) {
-  const meta = deriveMeta(((snapshot || {})['/public/settings'] || {}).settings);
+  const settings = ((snapshot || {})['/public/settings'] || {}).settings;
+  const meta = deriveMeta(settings);
+  const docfinder = (settings && settings.website_docfinder_url) || (REQUIRE_SNAPSHOT ? SITE_URL : DOCFINDER_DEFAULT);
   return {
     __BACKEND_URL__: BACKEND_URL,
     __PORTAL_URL__:  PORTAL_URL,
@@ -103,6 +106,10 @@ function makeReplacements(snapshot) {
     // ROBOTS=index, follow) - für Demo/Staging/Vorlage bleibt sie unauffindbar.
     __ROBOTS__: ROBOTS,
     __SNAPSHOT__: snapshot ? snapshotToHtml(snapshot) : 'null',
+    // Muster-Suchlink der Vorlage (JSON-LD sameAs, Bewertungs-Link): durch den
+    // echten DocFinder-Link ersetzen; ohne Eintrag bei echten Kundenseiten auf
+    // die eigene Seiten-URL, damit Suchmaschinen keinen Muster-Link sehen.
+    [DOCFINDER_DEFAULT]: docfinder,
   };
 }
 
@@ -140,7 +147,12 @@ function writeDist(replacements, src, out) {
 async function main() {
   const log = console.log;
   log(`Hole Praxisdaten von ${BACKEND_URL} ...`);
-  const { snapshot, missing } = await buildSnapshot({ log });
+  // Wiederholungen/Pause sind für Tests überschreibbar (sonst dauert ein Fehlerfall Minuten).
+  const { snapshot, missing } = await buildSnapshot({
+    log,
+    attempts: Number(process.env.BUILD_ATTEMPTS) || 3,
+    pauseMs: process.env.BUILD_PAUSE_MS !== undefined ? Number(process.env.BUILD_PAUSE_MS) : 5000,
+  });
   const missingRequired = missing.filter(p => REQUIRED_PATHS.includes(p));
 
   if (missingRequired.length && REQUIRE_SNAPSHOT) {
