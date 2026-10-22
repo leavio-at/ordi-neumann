@@ -35,6 +35,12 @@ const SNAPSHOT_PATHS = ['/public/settings', '/public/opening-hours', '/public/st
 const REQUIRED_PATHS = ['/public/settings', '/public/opening-hours'];
 
 const SAMPLE_WORD = /muster/i;
+// Standardlogo der Vorlage (liegt auf leavio.at): auf einer Kundenseite soll der Browser
+// keinen fremden Server kontaktieren. Ist das Praxislogo eingebettet, wird der
+// Platzhalter durch ein durchsichtiges 1x1-Bild ersetzt (das Logo kommt danach live
+// vom Backend, bei Ausfall aus der Momentaufnahme).
+const LEAVIO_DEFAULT_LOGO = 'https://leavio.at/leavio-logo.png';
+const BLANK_PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 const DOCFINDER_DEFAULT = 'https://www.docfinder.at/suche/arzt/ergebnis?searchterm=muster+wien';
 
 async function fetchJson(url, { fetchImpl = fetch, attempts = 3, timeoutMs = 60000, pauseMs = 5000, log = console.log } = {}) {
@@ -129,6 +135,7 @@ function makeReplacements(snapshot) {
     // echten DocFinder-Link ersetzen; ohne Eintrag bei echten Kundenseiten auf
     // die eigene Seiten-URL, damit Suchmaschinen keinen Muster-Link sehen.
     [DOCFINDER_DEFAULT]: docfinder,
+    [LEAVIO_DEFAULT_LOGO]: (snapshot && snapshot.__logo) ? BLANK_PIXEL : LEAVIO_DEFAULT_LOGO,
   };
 }
 

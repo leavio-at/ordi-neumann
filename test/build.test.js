@@ -105,6 +105,13 @@ test('the sample DocFinder link is replaced by the real one, or by the own site 
   assert.equal(real['https://www.docfinder.at/suche/arzt/ergebnis?searchterm=muster+wien'], 'https://www.docfinder.at/arzt/neumann');
 });
 
+test('with an embedded practice logo the page never contacts leavio.at for the placeholder', () => {
+  const withLogo = b.makeReplacements({ __built: 1, __logo: 'data:image/webp;base64,AAAA', '/public/settings': SETTINGS, '/public/opening-hours': HOURS });
+  assert.match(withLogo['https://leavio.at/leavio-logo.png'], /^data:image\/gif;base64,/);
+  const without = b.makeReplacements({ __built: 1, '/public/settings': SETTINGS, '/public/opening-hours': HOURS });
+  assert.equal(without['https://leavio.at/leavio-logo.png'], 'https://leavio.at/leavio-logo.png');
+});
+
 test('no snapshot is written as null (page then relies on cache/live)', () => {
   assert.equal(b.makeReplacements(null).__SNAPSHOT__, 'null');
 });
