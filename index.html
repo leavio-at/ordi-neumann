@@ -975,6 +975,13 @@
   .arzt-photo-wrap img, .lisa-photo-wrap img { transition: transform .6s ease; }
   .arzt-card:hover .arzt-photo-wrap img, .lisa-row:hover .lisa-photo-wrap img { transform: scale(1.05); }
 
+  /* Karte erst nach Klick */
+  .map-gate { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .9rem; text-align: center; padding: 2rem; min-height: 360px; width: 100%; }
+  .map-gate[hidden] { display: none; }
+  .map-pin { width: 44px; height: 44px; fill: none; stroke: var(--rose); stroke-width: 1.6; stroke-linejoin: round; }
+  .map-gate p { font-weight: 650; font-size: 1.1rem; color: var(--ink); }
+  .map-gate small { color: var(--ink-soft); max-width: 36ch; line-height: 1.5; }
+
   /* Praxislogo im Startbereich: deutlich größer (die Größe steht sonst im Bild selbst, daher !important) */
   .hero-logo-display { padding: 1rem 0 2rem; }
   #hero-logo-img { width: clamp(260px, 30vw, 460px) !important; }
@@ -1296,9 +1303,15 @@
     </div>
 
     <div class="kontakt-map">
-      <iframe id="kontakt-map-iframe" title="Anfahrtskarte" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+      <div class="map-gate" id="map-gate">
+        <svg class="map-pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 10-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.6"/></svg>
+        <p id="map-gate-title">Anfahrtskarte</p>
+        <button type="button" class="btn-primary" id="map-load">Karte anzeigen</button>
+        <small id="map-gate-note">Beim Anzeigen der Karte werden Daten an Google übertragen (siehe Datenschutz).</small>
+      </div>
+      <iframe id="kontakt-map-iframe" title="Anfahrtskarte" hidden referrerpolicy="no-referrer-when-downgrade"
         style="width:100%;height:100%;min-height:360px;border:0;align-self:stretch"
-        src="https://maps.google.com/maps?q=Teststra%C3%9Fe%201%2C%201010%20Wien&output=embed"></iframe>
+        data-src="https://maps.google.com/maps?q=Teststra%C3%9Fe%201%2C%201010%20Wien&output=embed"></iframe>
     </div>
   </div>
 </section>
@@ -1738,8 +1751,26 @@
     });
   }
 
+  // Karte erst nach Klick laden: Texte der Abfrage in drei Sprachen
+  var MAP_TXT = {
+    de: ['Anfahrtskarte', 'Karte anzeigen', 'Beim Anzeigen der Karte werden Daten an Google übertragen (siehe Datenschutz).'],
+    hu: ['Útvonaltérkép', 'Térkép megjelenítése', 'A térkép megjelenítésekor adatok kerülnek átadásra a Google számára (lásd adatvédelem).'],
+    en: ['Directions map', 'Show map', 'Showing the map transfers data to Google (see privacy policy).']
+  };
+  function applyMapGateText(lang) {
+    var m = MAP_TXT[lang] || MAP_TXT.de, ids = ['map-gate-title', 'map-load', 'map-gate-note'];
+    ids.forEach(function (id, i) { var el = document.getElementById(id); if (el) el.textContent = m[i]; });
+  }
+  (function () {
+    var b = document.getElementById('map-load'); if (!b) return;
+    b.addEventListener('click', function () {
+      var f = document.getElementById('kontakt-map-iframe'), g = document.getElementById('map-gate');
+      if (!f) return; f.src = f.getAttribute('data-src'); f.hidden = false; if (g) g.hidden = true;
+    });
+  })();
   function setLang(lang) {
     currentLang = lang;
+    applyMapGateText(lang);
     const t = LANG_DATA[lang];
 
     // Update html lang attribute
@@ -2472,7 +2503,11 @@
         // Platzhalter-Box ("Testadresse"), nie an echte Daten angebunden.
         // Kein API-Key nötig ("output=embed"-URL-Form).
         var mapEl = document.getElementById('kontakt-map-iframe');
-        if (mapEl) mapEl.src = 'https://maps.google.com/maps?q=' + encodeURIComponent(addr) + '&output=embed';
+        if (mapEl) {   // erst nach dem Klick auf "Karte anzeigen" laden (vorher keine Verbindung zu Google); ist sie schon geladen, wird sie aktualisiert
+          var mapUrl = 'https://maps.google.com/maps?q=' + encodeURIComponent(addr) + '&output=embed';
+          mapEl.setAttribute('data-src', mapUrl);
+          if (mapEl.getAttribute('src')) mapEl.src = mapUrl;
+        }
       }
       // Impressum-/Datenschutz-Adresse (ohne Pin-Emoji-Präfix)
       if (addr) {
@@ -3096,7 +3131,7 @@
 
       <h3>Google Maps</h3>
       <p>
-        Diese Website verwendet Google Maps zur Darstellung des Anfahrtsplans. Anbieter ist Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland. Beim Aufrufen der Karte werden Daten an Google übertragen. Weitere Informationen: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Datenschutzerklärung von Google</a>.
+        Diese Website verwendet Google Maps zur Darstellung des Anfahrtsplans. Anbieter ist Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland. Die Karte wird erst geladen, wenn Sie auf „Karte anzeigen“ klicken. Erst dann werden Daten (zum Beispiel Ihre IP-Adresse) an Google übertragen; ohne Klick erfolgt keine Verbindung zu Google (Rechtsgrundlage: Ihre Einwilligung durch den Klick, Art. 6 Abs. 1 lit. a DSGVO). Weitere Informationen: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Datenschutzerklärung von Google</a>.
       </p>
 
       <h3>Ihre Rechte</h3>

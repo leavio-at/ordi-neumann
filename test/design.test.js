@@ -138,3 +138,19 @@ test('Handy: der Knopf in der unteren Leiste wird auch aufgedeckt, wenn er im HT
   assert.match(html, /position:absolute;top:70px;left:0;right:0;background:#fff;[^']*border-radius:24px/);
   assert.match(html, /document\.querySelectorAll\('\.nav-links a\[href\^="#"\]'\)\.forEach/);
 });
+
+test('Karte: keine Verbindung zu Google, bis jemand auf "Karte anzeigen" klickt; Texte in drei Sprachen; Datenschutz sagt es', () => {
+  const m = /<iframe id="kontakt-map-iframe"[^>]*>/.exec(html)[0];
+  assert.doesNotMatch(m, /\ssrc=/, 'kein src-Attribut im Seitentext');
+  assert.match(m, /\bhidden\b/); assert.match(m, /data-src="https:\/\/maps\.google\.com\/maps\?q=/); assert.doesNotMatch(m, /loading="lazy"/);
+  assert.match(html, /mapEl\.setAttribute\('data-src', mapUrl\);/); assert.match(html, /if \(mapEl\.getAttribute\('src'\)\) mapEl\.src = mapUrl;/);
+  assert.doesNotMatch(html, /mapEl\.src = 'https:\/\/maps\.google/);
+  assert.match(html, /id="map-load"/); assert.match(html, /hu: \['Útvonaltérkép'/); assert.match(html, /en: \['Directions map', 'Show map'/);
+  assert.match(html, /function setLang\(lang\) \{\s*currentLang = lang;\s*applyMapGateText\(lang\);/);
+  assert.match(html, /ohne Klick erfolgt keine Verbindung zu Google/);
+  // Ablauf: Klick setzt die Quelle und zeigt die Karte
+  const vm = require('vm'); const a = html.indexOf('var b = document.getElementById(\'map-load\')'); const code = html.slice(html.lastIndexOf('(function () {', a), html.indexOf('})();', a) + 5);
+  let click; const f = { hidden: true, attrs: { 'data-src': 'https://maps.google.com/maps?q=X' }, getAttribute(k) { return this.attrs[k]; }, set src(v) { this.attrs.src = v; } }; const g = { hidden: false };
+  vm.runInNewContext(code, { document: { getElementById: id => (id === 'map-load' ? { addEventListener: (e, fn) => { click = fn; } } : id === 'kontakt-map-iframe' ? f : g) } });
+  assert.equal(f.attrs.src, undefined); click(); assert.equal(f.attrs.src, 'https://maps.google.com/maps?q=X'); assert.equal(f.hidden, false); assert.equal(g.hidden, true);
+});
